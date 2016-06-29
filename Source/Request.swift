@@ -104,9 +104,9 @@ class Request: AsyncOperation {
     // MARK: - Request logic
     
     /// Create a URL request for the specified host index.
-    private func createRequest(_ hostIndex: Int) -> NSMutableURLRequest {
+    private func createRequest(_ hostIndex: Int) -> URLRequest {
         let url = URL(string: "https://\(hosts[hostIndex])/\(path)")
-        let request = NSMutableURLRequest(url: url!)
+        var request = URLRequest(url: url!)
         request.httpMethod = method.rawValue
         request.timeoutInterval = nextTimeout
         if headers != nil {
