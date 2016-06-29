@@ -699,13 +699,13 @@ class QueryTests: XCTestCase {
         query1.alternativesAsExact_ = VALUES
         XCTAssertEqual(query1.alternativesAsExact_!, VALUES)
         XCTAssertEqual(query1.alternativesAsExact!, RAW_VALUES)
-        XCTAssertEqual(query1["alternativesAsExact"], RAW_VALUES.joinWithSeparator(","))
+        XCTAssertEqual(query1["alternativesAsExact"], RAW_VALUES.joined(separator: ","))
         let query2 = Query.parse(query1.build())
         XCTAssertEqual(query2.alternativesAsExact_!, VALUES)
         
         query1.alternativesAsExact = RAW_VALUES
         XCTAssertEqual(query1.alternativesAsExact_!, VALUES)
         XCTAssertEqual(query1.alternativesAsExact!, RAW_VALUES)
-        XCTAssertEqual(query1["alternativesAsExact"], RAW_VALUES.joinWithSeparator(","))
+        XCTAssertEqual(query1["alternativesAsExact"], RAW_VALUES.joined(separator: ","))
     }
 }

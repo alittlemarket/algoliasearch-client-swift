@@ -30,33 +30,33 @@ import Foundation
 public enum StatusCode: Int {
     // MARK: Regular HTTP status codes
     
-    case OK                                                     = 200
-    case BadRequest                                             = 400
-    case Unauthorized                                           = 401
-    case Forbidden                                              = 403
-    case MethodNotAllowed                                       = 405
-    case InternalServerError                                    = 500
-    case ServiceUnavailable                                     = 503
+    case ok                                                     = 200
+    case badRequest                                             = 400
+    case unauthorized                                           = 401
+    case forbidden                                              = 403
+    case methodNotAllowed                                       = 405
+    case internalServerError                                    = 500
+    case serviceUnavailable                                     = 503
     
     // MARK: Custom status codes
     
-    case Unknown                                                = -1
+    case unknown                                                = -1
     
     /// The server replied ill-formed JSON (syntax error).
-    case IllFormedResponse                                      = 600
+    case illFormedResponse                                      = 600
     
     /// The server replied an invalid response (grammar error).
-    case InvalidResponse                                        = 601
+    case invalidResponse                                        = 601
     
-    public static func isSuccess(statusCode: Int) -> Bool {
+    public static func isSuccess(_ statusCode: Int) -> Bool {
         return statusCode >= 200 && statusCode < 300
     }
     
-    public static func isClientError(statusCode: Int) -> Bool {
+    public static func isClientError(_ statusCode: Int) -> Bool {
         return statusCode >= 400 && statusCode < 500
     }
     
-    public static func isServerError(statusCode: Int) -> Bool {
+    public static func isServerError(_ statusCode: Int) -> Bool {
         return statusCode >= 500 && statusCode < 600
     }
 }

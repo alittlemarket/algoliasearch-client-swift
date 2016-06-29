@@ -25,41 +25,41 @@ import XCTest
 import AlgoliaSearch
 
 class ClientTests: XCTestCase {
-    let expectationTimeout: NSTimeInterval = 100
+    let expectationTimeout: TimeInterval = 100
     
     var client: Client!
     var index: Index!
     
     override func setUp() {
         super.setUp()
-        let appID = NSProcessInfo.processInfo().environment["ALGOLIA_APPLICATION_ID"] ?? APP_ID
-        let apiKey = NSProcessInfo.processInfo().environment["ALGOLIA_API_KEY"] ?? API_KEY
+        let appID = ProcessInfo.processInfo().environment["ALGOLIA_APPLICATION_ID"] ?? APP_ID
+        let apiKey = ProcessInfo.processInfo().environment["ALGOLIA_API_KEY"] ?? API_KEY
         client = AlgoliaSearch.Client(appID: appID, apiKey: apiKey)
         index = client.getIndex(safeIndexName("algol?à-swift"))
         
-        let expectation = expectationWithDescription("Delete index")
+        let expectation = self.expectation(withDescription: "Delete index")
         client.deleteIndex(index.indexName, completionHandler: { (content, error) -> Void in
             XCTAssertNil(error, "Error during deleteIndex: \(error?.description)")
             expectation.fulfill()
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     override func tearDown() {
         super.tearDown()
         
-        let expectation = expectationWithDescription("Delete index")
+        let expectation = self.expectation(withDescription: "Delete index")
         client.deleteIndex(index.indexName, completionHandler: { (content, error) -> Void in
             XCTAssertNil(error, "Error during deleteIndex: \(error?.description)")
             expectation.fulfill()
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testListIndexes() {
-        let expectation = expectationWithDescription("testListIndexes")
+        let expectation = self.expectation(withDescription: "testListIndexes")
         let object = ["city": "San Francisco", "objectID": "a/go/?à"]
         
         index.addObject(object, completionHandler: { (content, error) -> Void in
@@ -96,11 +96,11 @@ class ClientTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testMoveIndex() {
-        let expecation = expectationWithDescription("testMoveIndex")
+        let expecation = expectation(withDescription: "testMoveIndex")
         let object = ["city": "San Francisco", "objectID": "a/go/?à"]
         
         index.addObject(object, completionHandler: { (content, error) -> Void in
@@ -145,21 +145,21 @@ class ClientTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
         
-        let deleteExpectation = expectationWithDescription("Delete index")
+        let deleteExpectation = expectation(withDescription: "Delete index")
         client.deleteIndex(safeIndexName("algol?à-swift2"), completionHandler: { (content, error) -> Void in
             XCTAssertNil(error, "Error during deleteIndex: \(error?.description)")
             deleteExpectation.fulfill()
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testCopyIndex() {
-        let expecation = expectationWithDescription("testCopyIndex")
-        let srcIndexExpectation = expectationWithDescription("srcIndex")
-        let dstIndexExpectation = expectationWithDescription("dstIndex")
+        let expecation = expectation(withDescription: "testCopyIndex")
+        let srcIndexExpectation = expectation(withDescription: "srcIndex")
+        let dstIndexExpectation = expectation(withDescription: "dstIndex")
         
         let object = ["city": "San Francisco", "objectID": "a/go/?à"]
         
@@ -223,19 +223,19 @@ class ClientTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
         
-        let deleteExpectation = expectationWithDescription("Delete index")
+        let deleteExpectation = expectation(withDescription: "Delete index")
         client.deleteIndex(safeIndexName("algol?à-swift2"), completionHandler: { (content, error) -> Void in
             XCTAssertNil(error, "Error during deleteIndex: \(error?.description)")
             deleteExpectation.fulfill()
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testMultipleQueries() {
-        let expectation = expectationWithDescription("testMultipleQueries")
+        let expectation = self.expectation(withDescription: "testMultipleQueries")
         let object = ["city": "San Francisco"]
         
         index.addObject(object, completionHandler: { (content, error) -> Void in
@@ -266,12 +266,12 @@ class ClientTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testHeaders() {
         // Make a call with a valid API key.
-        let expectation1 = expectationWithDescription("Valid API key")
+        let expectation1 = expectation(withDescription: "Valid API key")
         self.client.listIndexes {
             (content, error) -> Void in
             XCTAssertNil(error)
@@ -280,7 +280,7 @@ class ClientTests: XCTestCase {
         
         // Override the API key and check the call fails.
         self.client.headers["X-Algolia-API-Key"] = "NOT_A_VALID_API_KEY"
-        let expectation2 = expectationWithDescription("Invalid API key")
+        let expectation2 = expectation(withDescription: "Invalid API key")
         self.client.listIndexes {
             (content, error) -> Void in
             XCTAssertNotNil(error)
@@ -290,11 +290,11 @@ class ClientTests: XCTestCase {
         // Restore the valid API key (otherwise tear down will fail).
         self.client.headers["X-Algolia-API-Key"] = self.client.apiKey
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testBatch() {
-        let expectation = expectationWithDescription(#function)
+        let expectation = self.expectation(withDescription: #function)
         let actions = [
             [
                 "indexName": index.indexName,
@@ -334,6 +334,6 @@ class ClientTests: XCTestCase {
                 XCTFail("Could not find task ID")
             }
         }
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
 }

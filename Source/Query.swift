@@ -104,7 +104,7 @@ import Foundation
         self.lng = lng
     }
     
-    public override func isEqual(object: AnyObject?) -> Bool {
+    public override func isEqual(_ object: AnyObject?) -> Bool {
         if let rhs = object as? LatLng {
             return self.lat == rhs.lat && self.lng == rhs.lng
         } else {
@@ -131,7 +131,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
         self.p2 = p2
     }
     
-    public override func isEqual(object: AnyObject?) -> Bool {
+    public override func isEqual(_ object: AnyObject?) -> Bool {
         if let rhs = object as? GeoRect {
             return self.p1 == rhs.p1 && self.p2 == rhs.p2
         } else {
@@ -161,7 +161,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// - parameter name:   The parameter's name.
     /// - returns: The parameter's value, or nil if a parameter with the specified name does not exist.
     ///
-    @objc public func get(name: String) -> String? {
+    @objc public func get(_ name: String) -> String? {
         return parameters[name]
     }
     
@@ -171,9 +171,9 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// - parameter name:   The parameter's name.
     /// - parameter value:  The parameter's value, or nill to remove it.
     ///
-    @objc public func set(name: String, value: String?) {
+    @objc public func set(_ name: String, value: String?) {
         if value == nil {
-            parameters.removeValueForKey(name)
+            parameters.removeValue(forKey: name)
         } else {
             parameters[name] = value!
         }
@@ -258,7 +258,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// The minimum number of characters in a query word to accept one typo in this word.
     @objc public var minWordSizefor1Typo: NSNumber? {
         get { return Query.toNumber(self.minWordSizefor1Typo_) }
-        set { self.minWordSizefor1Typo_ = newValue?.unsignedIntegerValue }
+        set { self.minWordSizefor1Typo_ = newValue?.uintValue }
     }
     var minWordSizefor1Typo_: UInt? {
         get { return Query.parseUInt(get("minWordSizefor1Typo")) }
@@ -268,7 +268,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// The minimum number of characters in a query word to accept two typos in this word.
     @objc public var minWordSizefor2Typos: NSNumber? {
         get { return Query.toNumber(self.minWordSizefor2Typos_) }
-        set { self.minWordSizefor2Typos_ = newValue?.unsignedIntegerValue }
+        set { self.minWordSizefor2Typos_ = newValue?.uintValue }
     }
     var minWordSizefor2Typos_: UInt? {
         get { return Query.parseUInt(get("minWordSizefor2Typos")) }
@@ -371,7 +371,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// between the 2 matching words.
     @objc public var minProximity: NSNumber? {
         get { return Query.toNumber(self.minProximity_) }
-        set { self.minProximity_ = newValue?.unsignedIntegerValue }
+        set { self.minProximity_ = newValue?.uintValue }
     }
     var minProximity_: UInt? {
         get { return Query.parseUInt(get("minProximity")) }
@@ -496,7 +496,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     ///
     @objc public var alternativesAsExact: [String]? {
         get { return Query.parseStringArray(get("alternativesAsExact")) }
-        set { set("alternativesAsExact", value: newValue?.joinWithSeparator(",")) }
+        set { set("alternativesAsExact", value: newValue?.joined(separator: ",")) }
     }
     public enum AlternativesAsExact: String {
         /// Alternative word added by the ignore plurals feature.
@@ -538,7 +538,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// retrieve the 10th page you need to set `page=9`
     @objc public var page: NSNumber? {
         get { return Query.toNumber(self.page_) }
-        set { self.page_ = newValue?.unsignedIntegerValue }
+        set { self.page_ = newValue?.uintValue }
     }
     var page_: UInt? {
         get { return Query.parseUInt(get("page")) }
@@ -548,7 +548,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// Pagination parameter used to select the number of hits per page. Defaults to 20.
     @objc public var hitsPerPage: NSNumber? {
         get { return Query.toNumber(self.hitsPerPage_) }
-        set { self.hitsPerPage_ = newValue?.unsignedIntegerValue }
+        set { self.hitsPerPage_ = newValue?.uintValue }
     }
     var hitsPerPage_: UInt? {
         get { return Query.parseUInt(get("hitsPerPage")) }
@@ -637,7 +637,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// only the best one is kept and others are removed.
     @objc public var distinct: NSNumber? {
         get { return Query.toNumber(self.distinct_) }
-        set { self.distinct_ = newValue?.unsignedIntegerValue }
+        set { self.distinct_ = newValue?.uintValue }
     }
     var distinct_: UInt? {
         get { return Query.parseUInt(get("distinct")) }
@@ -665,7 +665,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// max 10 values per facet.
     @objc public var maxValuesPerFacet: NSNumber? {
         get { return Query.toNumber(self.maxValuesPerFacet_) }
-        set { self.maxValuesPerFacet_ = newValue?.unsignedIntegerValue }
+        set { self.maxValuesPerFacet_ = newValue?.uintValue }
     }
     var maxValuesPerFacet_: UInt? {
         get { return Query.parseUInt(get("maxValuesPerFacet")) }
@@ -703,7 +703,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// geo-locations in your record).
     @objc public var aroundLatLng: LatLng? {
         get {
-            if let fields = get("aroundLatLng")?.componentsSeparatedByString(",") {
+            if let fields = get("aroundLatLng")?.components(separatedBy: ",") {
                 if fields.count == 2 {
                     if let lat = Double(fields[0]), lng = Double(fields[1]) {
                         return LatLng(lat: lat, lng: lng)
@@ -736,7 +736,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     ///
     @objc public var aroundRadius: NSNumber? {
         get { return Query.toNumber(self.aroundRadius_) }
-        set { self.aroundRadius_ = newValue?.unsignedIntegerValue }
+        set { self.aroundRadius_ = newValue?.uintValue }
     }
     var aroundRadius_: UInt? {
         get {
@@ -762,7 +762,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// ranking parameter (same for 100-199, 200-299, … ranges).
     @objc public var aroundPrecision: NSNumber? {
         get { return Query.toNumber(self.aroundPrecision_) }
-        set { self.aroundPrecision_ = newValue?.unsignedIntegerValue }
+        set { self.aroundPrecision_ = newValue?.uintValue }
     }
     var aroundPrecision_: UInt? {
         get { return Query.parseUInt(get("aroundPrecision")) }
@@ -774,7 +774,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// `automaticRadius` attribute of the answer.
     @objc public var minimumAroundRadius: NSNumber? {
         get { return Query.toNumber(self.minimumAroundRadius_) }
-        set { self.minimumAroundRadius_ = newValue?.unsignedIntegerValue }
+        set { self.minimumAroundRadius_ = newValue?.uintValue }
     }
     var minimumAroundRadius_: UInt? {
         get { return Query.parseUInt(get("minimumAroundRadius")) }
@@ -785,7 +785,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// You can use several bounding boxes (OR) by passing more than 1 value.
     @objc public var insideBoundingBox: [GeoRect]? {
         get {
-            if let fields = get("insideBoundingBox")?.componentsSeparatedByString(",") {
+            if let fields = get("insideBoundingBox")?.components(separatedBy: ",") {
                 if fields.count % 4 == 0 {
                     var result = [GeoRect]()
                     for i in 0..<(fields.count / 4) {
@@ -809,7 +809,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
                     components.append(String(box.p2.lat))
                     components.append(String(box.p2.lng))
                 }
-                set("insideBoundingBox", value: components.joinWithSeparator(","))
+                set("insideBoundingBox", value: components.joined(separator: ","))
             }
         }
     }
@@ -819,7 +819,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     // FIXME: Union cannot work with this implementation, as at most one occurrence per parameter is supported.
     @objc public var insidePolygon: [LatLng]? {
         get {
-            if let fields = get("insidePolygon")?.componentsSeparatedByString(",") {
+            if let fields = get("insidePolygon")?.components(separatedBy: ",") {
                 if fields.count % 2 == 0 && fields.count / 2 >= 3 {
                     var result = [LatLng]()
                     for i in 0..<(fields.count / 2) {
@@ -842,7 +842,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
                     components.append(String(point.lat))
                     components.append(String(point.lng))
                 }
-                set("insidePolygon", value: components.joinWithSeparator(","))
+                set("insidePolygon", value: components.joined(separator: ","))
             }
         }
     }
@@ -879,7 +879,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     ///
     /// NOTE: Primarily intended for Objective-C use. Swift coders should use `Query.init(copy:)`.
     ///
-    @objc public func copyWithZone(zone: NSZone) -> AnyObject {
+    @objc public func copy(with zone: NSZone?) -> AnyObject {
         // NOTE: As per the docs, the zone argument is ignored.
         return Query(copy: self)
     }
@@ -896,7 +896,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     // - question mark ('?') and hash ('#') removed because they mark the beginning and the end of the query string.
     // - plus ('+') is removed because it is interpreted as a space by Algolia's servers.
     //
-    static let queryParamAllowedCharacterSet = NSCharacterSet(charactersInString:
+    static let queryParamAllowedCharacterSet = CharacterSet(charactersIn:
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/[]@!$'()*,;"
     )
     
@@ -904,29 +904,29 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     @objc public func build() -> String {
         var components = [String]()
         // Sort parameters by name to get predictable output.
-        let sortedParameters = parameters.sort { $0.0 < $1.0 }
+        let sortedParameters = parameters.sorted { $0.0 < $1.0 }
         for (key, value) in sortedParameters {
-            if let escapedKey = key.stringByAddingPercentEncodingWithAllowedCharacters(Query.queryParamAllowedCharacterSet),
-                let escapedValue = value.stringByAddingPercentEncodingWithAllowedCharacters(Query.queryParamAllowedCharacterSet) {
+            if let escapedKey = key.addingPercentEncoding(withAllowedCharacters: Query.queryParamAllowedCharacterSet),
+                let escapedValue = value.addingPercentEncoding(withAllowedCharacters: Query.queryParamAllowedCharacterSet) {
                 components.append(escapedKey + "=" + escapedValue)
             }
         }
-        return components.joinWithSeparator("&")
+        return components.joined(separator: "&")
     }
 
     /// Parse a query from a URL query string.
-    @objc public static func parse(queryString: String) -> Query {
+    @objc public static func parse(_ queryString: String) -> Query {
         let query = Query()
-        let components = queryString.componentsSeparatedByString("&")
+        let components = queryString.components(separatedBy: "&")
         for component in components {
-            let fields = component.componentsSeparatedByString("=")
+            let fields = component.components(separatedBy: "=")
             if fields.count < 1 || fields.count > 2 {
                 continue
             }
             if let name = fields[0].stringByRemovingPercentEncoding {
                 let value: String? = fields.count >= 2 ? fields[1].stringByRemovingPercentEncoding : nil
                 if value == nil {
-                    query.parameters.removeValueForKey(name)
+                    query.parameters.removeValue(forKey: name)
                 } else {
                     query.parameters[name] = value!
                 }
@@ -937,7 +937,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     
     // MARK: Equatable
     
-    override public func isEqual(object: AnyObject?) -> Bool {
+    override public func isEqual(_ object: AnyObject?) -> Bool {
         guard let rhs = object as? Query else {
             return false
         }
@@ -948,33 +948,33 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     
     /// Build a plain, comma-separated array of strings.
     ///
-    class func buildStringArray(array: [String]?) -> String? {
+    class func buildStringArray(_ array: [String]?) -> String? {
         if array != nil {
-            return array!.joinWithSeparator(",")
+            return array!.joined(separator: ",")
         }
         return nil
     }
     
-    class func parseStringArray(string: String?) -> [String]? {
+    class func parseStringArray(_ string: String?) -> [String]? {
         if string != nil {
             // First try to parse the JSON notation:
             do {
-                if let array = try NSJSONSerialization.JSONObjectWithData(string!.dataUsingEncoding(NSUTF8StringEncoding)!, options: NSJSONReadingOptions(rawValue: 0)) as? [String] {
+                if let array = try JSONSerialization.jsonObject(with: string!.data(using: String.Encoding.utf8)!, options: JSONSerialization.ReadingOptions(rawValue: 0)) as? [String] {
                     return array
                 }
             } catch {
             }
             // Fallback on plain string parsing.
-            return string!.componentsSeparatedByString(",")
+            return string!.components(separatedBy: ",")
         }
         return nil
     }
     
-    class func buildJSONArray(array: [AnyObject]?) -> String? {
+    class func buildJSONArray(_ array: [AnyObject]?) -> String? {
         if array != nil {
             do {
-                let data = try NSJSONSerialization.dataWithJSONObject(array!, options: NSJSONWritingOptions(rawValue: 0))
-                if let string = String(data: data, encoding: NSUTF8StringEncoding) {
+                let data = try JSONSerialization.data(withJSONObject: array!, options: JSONSerialization.WritingOptions(rawValue: 0))
+                if let string = String(data: data, encoding: String.Encoding.utf8) {
                     return string
                 }
             } catch {
@@ -983,10 +983,10 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
         return nil
     }
     
-    class func parseJSONArray(string: String?) -> [AnyObject]? {
+    class func parseJSONArray(_ string: String?) -> [AnyObject]? {
         if string != nil {
             do {
-                if let array = try NSJSONSerialization.JSONObjectWithData(string!.dataUsingEncoding(NSUTF8StringEncoding)!, options: NSJSONReadingOptions(rawValue: 0)) as? [AnyObject] {
+                if let array = try JSONSerialization.jsonObject(with: string!.data(using: String.Encoding.utf8)!, options: JSONSerialization.ReadingOptions(rawValue: 0)) as? [AnyObject] {
                     return array
                 }
             } catch {
@@ -995,11 +995,11 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
         return nil
     }
     
-    class func buildUInt(int: UInt?) -> String? {
+    class func buildUInt(_ int: UInt?) -> String? {
         return int == nil ? nil : String(int!)
     }
     
-    class func parseUInt(string: String?) -> UInt? {
+    class func parseUInt(_ string: String?) -> UInt? {
         if string != nil {
             if let intValue = UInt(string!) {
                 return intValue
@@ -1008,13 +1008,13 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
         return nil
     }
     
-    class func buildBool(bool: Bool?) -> String? {
+    class func buildBool(_ bool: Bool?) -> String? {
         return bool == nil ? nil : String(bool!)
     }
     
-    class func parseBool(string: String?) -> Bool? {
+    class func parseBool(_ string: String?) -> Bool? {
         if string != nil {
-            switch (string!.lowercaseString) {
+            switch (string!.lowercased()) {
                 case "true": return true
                 case "false": return false
                 default:
@@ -1026,11 +1026,11 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
         return nil
     }
     
-    class func toNumber(bool: Bool?) -> NSNumber? {
-        return bool == nil ? nil : NSNumber(bool: bool!)
+    class func toNumber(_ bool: Bool?) -> NSNumber? {
+        return bool == nil ? nil : NSNumber(value: bool!)
     }
 
-    class func toNumber(int: UInt?) -> NSNumber? {
-        return int == nil ? nil : NSNumber(unsignedInteger: int!)
+    class func toNumber(_ int: UInt?) -> NSNumber? {
+        return int == nil ? nil : NSNumber(value: int!)
     }
 }

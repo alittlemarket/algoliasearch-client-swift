@@ -23,7 +23,7 @@ public struct MockResponse {
     /// HTTP headers to return.
     public let headers: [String : String]?
     
-    public let data: NSData?
+    public let data: Data?
     
     // In case of (network) error
     // --------------------------
@@ -35,12 +35,12 @@ public struct MockResponse {
     public init(statusCode: Int, jsonBody: AnyObject) {
         self.statusCode = statusCode
         self.headers = nil
-        self.data = try? NSJSONSerialization.dataWithJSONObject(jsonBody, options: []) ?? NSData()
+        self.data = try? JSONSerialization.data(withJSONObject: jsonBody, options: []) ?? Data()
         self.error = nil
     }
     
     /// Construct a successful response with a raw data body.
-    public init(statusCode: Int, data: NSData) {
+    public init(statusCode: Int, data: Data) {
         self.statusCode = statusCode
         self.headers = nil
         self.data = data
@@ -58,7 +58,7 @@ public struct MockResponse {
 
 /// A replacement for `NSURLSession` used for mocking network requests.
 ///
-public class MockURLSession: URLSession {
+public class MockURLSession: AlgoliaSearch.URLSession {
     /// Predefined set of responses for the specified URLs.
     public var responses: [String: MockResponse] = [String: MockResponse]()
     
@@ -67,8 +67,8 @@ public class MockURLSession: URLSession {
     
     let defaultResponse = MockResponse(error: NSError(domain: NSURLErrorDomain, code: NSURLErrorResourceUnavailable, userInfo: nil))
     
-    public func dataTaskWithRequest(request: NSURLRequest, completionHandler: (NSData?, NSURLResponse?, NSError?) -> Void) -> NSURLSessionDataTask {
-        let details = responses[request.URL!.absoluteString] ?? defaultResponse
+    public func dataTaskWithRequest(_ request: URLRequest, completionHandler: (Data?, URLResponse?, NSError?) -> Void) -> URLSessionDataTask {
+        let details = responses[request.url!.absoluteString!] ?? defaultResponse
         let task = MockURLSessionDataTask(request: request, details: details, completionHandler: completionHandler)
         task.cancellable = self.cancellable
         return task
@@ -76,8 +76,8 @@ public class MockURLSession: URLSession {
 }
 
 /// A mock replacement for `NSURLSessionDataTask`.
-public class MockURLSessionDataTask: NSURLSessionDataTask {
-    typealias CompletionHandler = (NSData?, NSURLResponse?, NSError?) -> Void
+public class MockURLSessionDataTask: URLSessionDataTask {
+    typealias CompletionHandler = (Data?, URLResponse?, NSError?) -> Void
 
     /// Response to answer
     let details: MockResponse
@@ -88,17 +88,17 @@ public class MockURLSessionDataTask: NSURLSessionDataTask {
     /// Whether this request was cancelled.
     var cancelled: Bool = false
     
-    let request: NSURLRequest
+    let request: URLRequest
     let completionHandler: CompletionHandler
     
-    init(request: NSURLRequest, details: MockResponse, completionHandler: CompletionHandler) {
+    init(request: URLRequest, details: MockResponse, completionHandler: CompletionHandler) {
         self.request = request
         self.details = details
         self.completionHandler = completionHandler
     }
     
     override public func resume() {
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             // Do not call any delegate method if cancelled.
             if self.cancelled {
                 return
@@ -110,7 +110,7 @@ public class MockURLSessionDataTask: NSURLSessionDataTask {
             // In case of success: return a response and a data.
             else {
                 assert(self.details.statusCode != nil)
-                let httpResponse = NSHTTPURLResponse(URL: self.request.URL!, statusCode: self.details.statusCode!, HTTPVersion: "HTTP/1.1", headerFields: self.details.headers)!
+                let httpResponse = HTTPURLResponse(url: self.request.url!, statusCode: self.details.statusCode!, httpVersion: "HTTP/1.1", headerFields: self.details.headers)!
                 assert(self.details.data != nil)
                 self.completionHandler(self.details.data, httpResponse, nil)
             }

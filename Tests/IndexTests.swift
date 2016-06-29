@@ -25,41 +25,41 @@ import XCTest
 import AlgoliaSearch
 
 class IndexTests: XCTestCase {
-    let expectationTimeout: NSTimeInterval = 100
+    let expectationTimeout: TimeInterval = 100
     
     var client: Client!
     var index: Index!
     
     override func setUp() {
         super.setUp()
-        let appID = NSProcessInfo.processInfo().environment["ALGOLIA_APPLICATION_ID"] ?? APP_ID
-        let apiKey = NSProcessInfo.processInfo().environment["ALGOLIA_API_KEY"] ?? API_KEY
+        let appID = ProcessInfo.processInfo().environment["ALGOLIA_APPLICATION_ID"] ?? APP_ID
+        let apiKey = ProcessInfo.processInfo().environment["ALGOLIA_API_KEY"] ?? API_KEY
         client = AlgoliaSearch.Client(appID: appID, apiKey: apiKey)
         index = client.getIndex(safeIndexName("algol?à-swift"))
         
-        let expectation = expectationWithDescription("Delete index")
+        let expectation = self.expectation(withDescription: "Delete index")
         client.deleteIndex(index.indexName, completionHandler: { (content, error) -> Void in
             XCTAssertNil(error, "Error during deleteIndex: \(error?.description)")
             expectation.fulfill()
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     override func tearDown() {
         super.tearDown()
         
-        let expectation = expectationWithDescription("Delete index")
+        let expectation = self.expectation(withDescription: "Delete index")
         client.deleteIndex(index.indexName, completionHandler: { (content, error) -> Void in
             XCTAssertNil(error, "Error during deleteIndex: \(error?.description)")
             expectation.fulfill()
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testAdd() {
-        let expectation = expectationWithDescription("testAdd")
+        let expectation = self.expectation(withDescription: "testAdd")
         let object = ["city": "San Francisco"]
         
         index.addObject(object, completionHandler: { (content, error) -> Void in
@@ -87,11 +87,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testAddWithObjectID() {
-        let expectation = expectationWithDescription("testAddWithObjectID")
+        let expectation = self.expectation(withDescription: "testAddWithObjectID")
         let object = ["city": "San José"]
         let objectID = "a/go/?à"
         
@@ -120,11 +120,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testAddObjects() {
-        let expectation = expectationWithDescription("testAddObjects")
+        let expectation = self.expectation(withDescription: "testAddObjects")
         let objects: [[String: AnyObject]] = [
             ["city": "San Francisco"],
             ["city": "New York"]
@@ -155,11 +155,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testWaitTask() {
-        let expectation = expectationWithDescription("testWaitTask")
+        let expectation = self.expectation(withDescription: "testWaitTask")
         let object = ["city": "Paris", "objectID": "a/go/?à"]
         
         index.addObject(object, completionHandler: { (content, error) -> Void in
@@ -179,11 +179,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testDelete() {
-        let expectation = expectationWithDescription("testDelete")
+        let expectation = self.expectation(withDescription: "testDelete")
         let object = ["city": "Las Vegas", "objectID": "a/go/?à"]
         
         index.addObject(object, completionHandler: { (content, error) -> Void in
@@ -218,11 +218,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testDeleteObjects() {
-        let expectation = expectationWithDescription("testDeleteObjects")
+        let expectation = self.expectation(withDescription: "testDeleteObjects")
         let objects: [[String: AnyObject]] = [
             ["city": "San Francisco", "objectID": "a/go/?à"],
             ["city": "New York", "objectID": "a/go/?à$"]
@@ -260,11 +260,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testGet() {
-        let expectation = expectationWithDescription("testGet")
+        let expectation = self.expectation(withDescription: "testGet")
         let object = ["city": "Los Angeles", "objectID": "a/go/?à"]
         
         index.addObject(object, completionHandler: { (content, error) -> Void in
@@ -292,11 +292,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testGetObjects() {
-        let expectation = expectationWithDescription("testGetObjects")
+        let expectation = self.expectation(withDescription: "testGetObjects")
         let objects: [[String: AnyObject]] = [
             ["city": "San Francisco", "objectID": "a/go/?à"],
             ["city": "New York", "objectID": "a/go/?à$"]
@@ -328,11 +328,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testPartialUpdateObject() {
-        let expectation = expectationWithDescription("testPartialUpdateObject")
+        let expectation = self.expectation(withDescription: "testPartialUpdateObject")
         let object = ["city": "New York", "initial": "NY", "objectID": "a/go/?à"]
         
         index.addObject(object, completionHandler: { (content, error) -> Void in
@@ -369,11 +369,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testPartialUpdateObjects() {
-        let expectation = expectationWithDescription("testPartialUpdateObjects")
+        let expectation = self.expectation(withDescription: "testPartialUpdateObjects")
         let objects: [[String: AnyObject]] = [
             ["city": "San Francisco", "initial": "SF", "objectID": "a/go/?à"],
             ["city": "New York", "initial": "NY", "objectID": "a/go/?à$"]
@@ -418,11 +418,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testSaveObject() {
-        let expectation = expectationWithDescription("testSaveObject")
+        let expectation = self.expectation(withDescription: "testSaveObject")
         let object: [String: AnyObject] = ["city": "New York", "initial": "NY", "objectID": "a/go/?à"]
         
         index.addObject(object, completionHandler: { (content, error) -> Void in
@@ -459,11 +459,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testSaveObjects() {
-        let expectation = expectationWithDescription("testSaveObjects")
+        let expectation = self.expectation(withDescription: "testSaveObjects")
         let objects: [[String: AnyObject]] = [
             ["city": "San Francisco", "initial": "SF", "objectID": "a/go/?à"],
             ["city": "New York", "initial": "NY", "objectID": "a/go/?à$"]
@@ -508,11 +508,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testClear() {
-        let expectation = expectationWithDescription("testClear")
+        let expectation = self.expectation(withDescription: "testClear")
         let object: [String: AnyObject] = ["city": "San Francisco", "objectID": "a/go/?à"]
         
         index.addObject(object, completionHandler: { (content, error) -> Void in
@@ -547,11 +547,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testSettings() {
-        let expectation = expectationWithDescription("testSettings")
+        let expectation = self.expectation(withDescription: "testSettings")
         let settings = ["attributesToRetrieve": ["name"]]
         
         index.setSettings(settings, completionHandler: { (content, error) -> Void in
@@ -579,11 +579,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
 
     func testSettings_forwardToSlaves() {
-        let expectation = expectationWithDescription("testSettings")
+        let expectation = self.expectation(withDescription: "testSettings")
         let settings = ["attributesToRetrieve": ["name"]]
         
         index.setSettings(settings, forwardToSlaves: true, completionHandler: { (content, error) -> Void in
@@ -611,11 +611,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
 
     func testBrowse() {
-        let expectation = expectationWithDescription("testBrowseWithQuery")
+        let expectation = self.expectation(withDescription: "testBrowseWithQuery")
         var objects: [[String: AnyObject]] = []
         for i in 0...1500 {
             objects.append(["i": i])
@@ -661,11 +661,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testBatch() {
-        let expectation = expectationWithDescription(#function)
+        let expectation = self.expectation(withDescription: #function)
         let actions: [[String: AnyObject]] = [
             [
                 "action": "addObject",
@@ -703,11 +703,11 @@ class IndexTests: XCTestCase {
                 XCTFail("Could not find task ID")
             }
         }
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testDeleteByQuery() {
-        let expectation = expectationWithDescription(#function)
+        let expectation = self.expectation(withDescription: #function)
         var objects: [[String: AnyObject]] = []
         for i in 0..<3000 {
             objects.append(["dummy": i])
@@ -750,11 +750,11 @@ class IndexTests: XCTestCase {
             }
         })
         
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testSearchDisjunctiveFaceting() {
-        let expectation = expectationWithDescription("testAddObjects")
+        let expectation = self.expectation(withDescription: "testAddObjects")
         let objects: [[String: AnyObject]] = [
             ["name": "iPhone 6",                "brand": "Apple",       "category": "device",       "stars": 4],
             ["name": "iPhone 6 Plus",           "brand": "Apple",       "category": "device",       "stars": 5],
@@ -822,15 +822,15 @@ class IndexTests: XCTestCase {
                 })
             }
         })
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testSearchDisjunctiveFaceting2() {
-        let expectation = expectationWithDescription(#function)
-        let expectation1 = expectationWithDescription("empty refinements")
-        let expectation2 = self.expectationWithDescription("stars (1 value)")
-        let expectation3 = self.expectationWithDescription("stars (1 value) + city")
-        let expectation4 = self.expectationWithDescription("stars (2 values) + city")
+        let expectation = self.expectation(withDescription: #function)
+        let expectation1 = self.expectation(withDescription: "empty refinements")
+        let expectation2 = self.expectation(withDescription: "stars (1 value)")
+        let expectation3 = self.expectation(withDescription: "stars (1 value) + city")
+        let expectation4 = self.expectation(withDescription: "stars (2 values) + city")
         let expectations = [expectation, expectation1, expectation2, expectation3, expectation4]
         
         let objects: [[String: AnyObject]] = [
@@ -944,15 +944,15 @@ class IndexTests: XCTestCase {
                 })
             })
         })
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
     
     func testDNSTimeout() {
-        let expectation = expectationWithDescription(#function)
+        let expectation = self.expectation(withDescription: #function)
 
         // The DNS lookup for any host in the `algolia.biz` domain will time-out.
         // We generate a new host name every time to avoid any cache effect.
-        client.readHosts[0] = "swift-\(UInt32(NSDate().timeIntervalSince1970)).algolia.biz"
+        client.readHosts[0] = "swift-\(UInt32(Date().timeIntervalSince1970)).algolia.biz"
         
         client.listIndexes({
             (content, error) -> Void in
@@ -961,6 +961,6 @@ class IndexTests: XCTestCase {
             }
             expectation.fulfill()
         })
-        waitForExpectationsWithTimeout(expectationTimeout, handler: nil)
+        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
     }
 }

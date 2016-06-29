@@ -60,7 +60,7 @@ public typealias BrowseIteratorHandler = (iterator: BrowseIterator, content: [St
     private var cancelled: Bool = false
     
     /// The currently ongoing request, if any.
-    private var request: NSOperation?
+    private var request: Operation?
     
     /// Construct a new browse iterator.
     /// NOTE: The iteration does not start automatically. You have to call `start()` explicitly.
@@ -92,7 +92,7 @@ public typealias BrowseIteratorHandler = (iterator: BrowseIterator, content: [St
         cancelled = true
     }
     
-    private func handleResult(content: [String: AnyObject]?, error: NSError?) {
+    private func handleResult(_ content: [String: AnyObject]?, error: NSError?) {
         request = nil
         cursor = content?["cursor"] as? String
         if !cancelled {

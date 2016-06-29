@@ -46,10 +46,10 @@ import Foundation
     }
 
     /// Default timeout for network requests. Default: 30".
-    @objc public let timeout: NSTimeInterval = 30
+    @objc public let timeout: TimeInterval = 30
     
     /// Timeout for search requests. Default: 5".
-    @objc public let searchTimeout: NSTimeInterval = 5
+    @objc public let searchTimeout: TimeInterval = 5
 
     @objc public let appID: String
 
@@ -78,7 +78,7 @@ import Foundation
     }
     
     /// Set read and write hosts to the same value (convenience method).
-    @objc public func setHosts(hosts: [String]) {
+    @objc public func setHosts(_ hosts: [String]) {
         readHosts = hosts
         writeHosts = hosts
     }
@@ -112,13 +112,13 @@ import Foundation
         writeHosts = [ "\(appID).algolia.net" ] + fallbackHosts
         
         // WARNING: Those headers cannot be changed for the lifetime of the session.
-        let version = NSBundle(forClass: self.dynamicType).infoDictionary!["CFBundleShortVersionString"] as! String
+        let version = Bundle(for: self.dynamicType).infoDictionary!["CFBundleShortVersionString"] as! String
         let fixedHTTPHeaders = [
             "X-Algolia-Application-Id": self.appID
         ]
-        let configuration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        configuration.HTTPAdditionalHeaders = fixedHTTPHeaders
-        session = NSURLSession(configuration: configuration)
+        let configuration = URLSessionConfiguration.default()
+        configuration.httpAdditionalHeaders = fixedHTTPHeaders
+        session = Foundation.URLSession(configuration: configuration)
         
         super.init()
         
@@ -135,7 +135,7 @@ import Foundation
     /// - parameter name: Header name.
     /// - parameter value: Value for the header. If nil, the header will be removed.
     ///
-    @objc public func setHeader(name: String!, value: String) {
+    @objc public func setHeader(_ name: String!, value: String) {
         headers[name] = value
     }
     
@@ -146,7 +146,7 @@ import Foundation
     /// - parameter name: Header name.
     /// - returns: The header's value, or nil if the header does not exist.
     ///
-    @objc public func getHeader(name: String) -> String? {
+    @objc public func getHeader(_ name: String) -> String? {
         return headers[name]
     }
 
@@ -157,7 +157,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
-    @objc public func listIndexes(completionHandler: CompletionHandler) -> NSOperation {
+    @objc public func listIndexes(_ completionHandler: CompletionHandler) -> Operation {
         return performHTTPQuery("1/indexes", method: .GET, body: nil, hostnames: readHosts, completionHandler: completionHandler)
     }
 
@@ -167,7 +167,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
-    @objc public func deleteIndex(indexName: String, completionHandler: CompletionHandler? = nil) -> NSOperation {
+    @objc public func deleteIndex(_ indexName: String, completionHandler: CompletionHandler? = nil) -> Operation {
         let path = "1/indexes/\(indexName.urlEncode())"
         return performHTTPQuery(path, method: .DELETE, body: nil, hostnames: writeHosts, completionHandler: completionHandler)
     }
@@ -182,7 +182,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
-    @objc public func moveIndex(srcIndexName: String, to dstIndexName: String, completionHandler: CompletionHandler? = nil) -> NSOperation {
+    @objc public func moveIndex(_ srcIndexName: String, to dstIndexName: String, completionHandler: CompletionHandler? = nil) -> Operation {
         let path = "1/indexes/\(srcIndexName.urlEncode())/operation"
         let request = [
             "destination": dstIndexName,
@@ -202,7 +202,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
-    @objc public func copyIndex(srcIndexName: String, to dstIndexName: String, completionHandler: CompletionHandler? = nil) -> NSOperation {
+    @objc public func copyIndex(_ srcIndexName: String, to dstIndexName: String, completionHandler: CompletionHandler? = nil) -> Operation {
         let path = "1/indexes/\(srcIndexName.urlEncode())/operation"
         let request = [
             "destination": dstIndexName,
@@ -217,7 +217,7 @@ import Foundation
     /// - parameter indexName: The name of the index.
     /// - returns: A new proxy to the specified index.
     ///
-    @objc public func getIndex(indexName: String) -> Index {
+    @objc public func getIndex(_ indexName: String) -> Index {
         // IMPLEMENTATION NOTE: This method is called `initIndex` in other clients, which better conveys its semantics.
         // However, methods prefixed by `init` are automatically considered as initializers by the Objective-C bridge.
         // Therefore, `initIndex` would fail to compile in Objective-C, because its return type is not `instancetype`.
@@ -240,7 +240,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
-    @objc public func multipleQueries(queries: [IndexQuery], strategy: String?, completionHandler: CompletionHandler? = nil) -> NSOperation {
+    @objc public func multipleQueries(_ queries: [IndexQuery], strategy: String?, completionHandler: CompletionHandler? = nil) -> Operation {
         // IMPLEMENTATION NOTE: Objective-C bridgeable alternative.
         var path = "1/indexes/*/queries"
         if strategy != nil {
@@ -265,7 +265,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
-    public func multipleQueries(queries: [IndexQuery], strategy: MultipleQueriesStrategy? = nil, completionHandler: CompletionHandler? = nil) -> NSOperation {
+    public func multipleQueries(_ queries: [IndexQuery], strategy: MultipleQueriesStrategy? = nil, completionHandler: CompletionHandler? = nil) -> Operation {
         // IMPLEMENTATION NOTE: Not Objective-C bridgeable because of enum.
         return multipleQueries(queries, strategy: strategy?.rawValue, completionHandler: completionHandler)
     }
@@ -276,7 +276,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
-    @objc public func batch(operations: [AnyObject], completionHandler: CompletionHandler? = nil) -> NSOperation {
+    @objc public func batch(_ operations: [AnyObject], completionHandler: CompletionHandler? = nil) -> Operation {
         let path = "1/indexes/*/batch"
         let body = ["requests": operations]
         return performHTTPQuery(path, method: .POST, body: body, hostnames: writeHosts, completionHandler: completionHandler)
@@ -285,11 +285,11 @@ import Foundation
     // MARK: - Network
 
     /// Perform an HTTP Query.
-    func performHTTPQuery(path: String, method: HTTPMethod, body: [String: AnyObject]?, hostnames: [String], isSearchQuery: Bool = false, completionHandler: CompletionHandler? = nil) -> NSOperation {
+    func performHTTPQuery(_ path: String, method: HTTPMethod, body: [String: AnyObject]?, hostnames: [String], isSearchQuery: Bool = false, completionHandler: CompletionHandler? = nil) -> Operation {
         let request = newRequest(method, path: path, body: body, hostnames: hostnames, isSearchQuery: isSearchQuery) {
             (content: [String: AnyObject]?, error: NSError?) -> Void in
             if completionHandler != nil {
-                dispatch_async(dispatch_get_main_queue()) {
+                DispatchQueue.main.async {
                     completionHandler!(content: content, error: error)
                 }
             }
@@ -299,7 +299,7 @@ import Foundation
     }
     
     /// Create a request with this client's settings.
-    func newRequest(method: HTTPMethod, path: String, body: [String: AnyObject]?, hostnames: [String], isSearchQuery: Bool = false, completion: CompletionHandler? = nil) -> Request {
+    func newRequest(_ method: HTTPMethod, path: String, body: [String: AnyObject]?, hostnames: [String], isSearchQuery: Bool = false, completion: CompletionHandler? = nil) -> Request {
         let currentTimeout = isSearchQuery ? searchTimeout : timeout
         let request = Request(session: session, method: method, hosts: hostnames, firstHostIndex: 0, path: path, headers: headers, jsonBody: body, timeout: currentTimeout, completion:  completion)
         return request

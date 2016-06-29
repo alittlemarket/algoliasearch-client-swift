@@ -34,10 +34,10 @@ enum HTTPMethod: String {
 /// Abstraction of `NSURLSession`.
 /// Only for the sake of unit tests.
 protocol URLSession {
-    func dataTaskWithRequest(request: NSURLRequest, completionHandler: (NSData?, NSURLResponse?, NSError?) -> Void) -> NSURLSessionDataTask
+    func dataTaskWithRequest(_ request: URLRequest, completionHandler: (Data?, URLResponse?, NSError?) -> Void) -> URLSessionDataTask
 }
 
 // Convince the compiler that NSURLSession does implements our custom protocol.
-extension NSURLSession: URLSession {
+extension Foundation.URLSession: URLSession {
 }
 

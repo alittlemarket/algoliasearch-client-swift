@@ -54,20 +54,20 @@ class Request: AsyncOperation {
     let jsonBody: [String: AnyObject]?
     
     /// Timeout for individual network queries.
-    let timeout: NSTimeInterval
+    let timeout: TimeInterval
     
     /// Timeout to be used for the next query.
-    var nextTimeout: NSTimeInterval
+    var nextTimeout: TimeInterval
     
     /// The current network task.
-    var task: NSURLSessionTask?
+    var task: URLSessionTask?
     
     /// User completion block to be called.
     let completion: CompletionHandler?
     
     // MARK: - Initialization
     
-    init(session: URLSession, method: HTTPMethod, hosts: [String], firstHostIndex: Int, path: String, headers: [String: String]?, jsonBody: [String: AnyObject]?, timeout: NSTimeInterval, completion: CompletionHandler?) {
+    init(session: URLSession, method: HTTPMethod, hosts: [String], firstHostIndex: Int, path: String, headers: [String: String]?, jsonBody: [String: AnyObject]?, timeout: TimeInterval, completion: CompletionHandler?) {
         self.session = session
         self.method = method
         self.hosts = hosts
@@ -104,10 +104,10 @@ class Request: AsyncOperation {
     // MARK: - Request logic
     
     /// Create a URL request for the specified host index.
-    private func createRequest(hostIndex: Int) -> NSMutableURLRequest {
-        let url = NSURL(string: "https://\(hosts[hostIndex])/\(path)")
-        let request = NSMutableURLRequest(URL: url!)
-        request.HTTPMethod = method.rawValue
+    private func createRequest(_ hostIndex: Int) -> NSMutableURLRequest {
+        let url = URL(string: "https://\(hosts[hostIndex])/\(path)")
+        let request = NSMutableURLRequest(url: url!)
+        request.httpMethod = method.rawValue
         request.timeoutInterval = nextTimeout
         if headers != nil {
             for (key, value) in headers! {
@@ -116,8 +116,8 @@ class Request: AsyncOperation {
         }
         if jsonBody != nil {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            if let payload = try? NSJSONSerialization.dataWithJSONObject(jsonBody!, options: NSJSONWritingOptions(rawValue: 0)) {
-                request.HTTPBody = payload
+            if let payload = try? JSONSerialization.data(withJSONObject: jsonBody!, options: JSONSerialization.WritingOptions(rawValue: 0)) {
+                request.httpBody = payload
             } else {
                 // The JSON we try to send should always be well-formed.
                 assert(false, "Trying to send a request with invalid JSON")
@@ -131,11 +131,11 @@ class Request: AsyncOperation {
         let request = createRequest(nextHostIndex)
         nextHostIndex = (nextHostIndex + 1) % hosts.count
         task = session.dataTaskWithRequest(request) {
-            (data: NSData?, response: NSURLResponse?, error: NSError?) in
+            (data: Data?, response: URLResponse?, error: NSError?) in
             var json: [String: AnyObject]?
             var finalError: NSError? = error
             // Shortcut in case of cancellation.
-            if self.cancelled {
+            if self.isCancelled {
                 self.finish()
                 return
             }
@@ -146,18 +146,18 @@ class Request: AsyncOperation {
                 // Parse JSON response.
                 // NOTE: We parse JSON even in case of failure to get the error message.
                 do {
-                    json = try NSJSONSerialization.JSONObjectWithData(data!, options: .AllowFragments) as? [String: AnyObject]
+                    json = try JSONSerialization.jsonObject(with: data!, options: .allowFragments) as? [String: AnyObject]
                     if json == nil {
-                        finalError = NSError(domain: Client.ErrorDomain, code: StatusCode.InvalidResponse.rawValue, userInfo: [NSLocalizedDescriptionKey: "Server response not a JSON object"])
+                        finalError = NSError(domain: Client.ErrorDomain, code: StatusCode.invalidResponse.rawValue, userInfo: [NSLocalizedDescriptionKey: "Server response not a JSON object"])
                     }
                 } catch let jsonError as NSError {
-                    finalError = NSError(domain: Client.ErrorDomain, code: StatusCode.IllFormedResponse.rawValue, userInfo: [NSLocalizedDescriptionKey: "Server returned ill-formed JSON", NSUnderlyingErrorKey: jsonError])
+                    finalError = NSError(domain: Client.ErrorDomain, code: StatusCode.illFormedResponse.rawValue, userInfo: [NSLocalizedDescriptionKey: "Server returned ill-formed JSON", NSUnderlyingErrorKey: jsonError])
                 } catch {
-                    finalError = NSError(domain: Client.ErrorDomain, code: StatusCode.Unknown.rawValue, userInfo: [NSLocalizedDescriptionKey: "Unknown error when parsing JSON"])
+                    finalError = NSError(domain: Client.ErrorDomain, code: StatusCode.unknown.rawValue, userInfo: [NSLocalizedDescriptionKey: "Unknown error when parsing JSON"])
                 }
                 
                 // Handle HTTP status code.
-                let httpResponse = response! as! NSHTTPURLResponse
+                let httpResponse = response! as! HTTPURLResponse
                 if (finalError == nil && !StatusCode.isSuccess(httpResponse.statusCode)) {
                     var userInfo = [String: AnyObject]()
                     
@@ -190,7 +190,7 @@ class Request: AsyncOperation {
     
     /// Finish this operation.
     /// This method should be called exactly once per operation.
-    private func callCompletion(content: [String: AnyObject]?, error: NSError?) {
+    private func callCompletion(_ content: [String: AnyObject]?, error: NSError?) {
         assert(!_finished)
         if completion != nil && !_cancelled {
             completion!(content: content, error: error)

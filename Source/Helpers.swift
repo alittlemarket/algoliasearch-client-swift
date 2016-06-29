@@ -26,8 +26,8 @@ import Foundation
 extension String {
     /// Return URL encoded version of the string
     func urlEncode() -> String {
-        let customAllowedSet = NSCharacterSet(charactersInString: "!*'();:@&=+$,/?%#[]").invertedSet
-        return stringByAddingPercentEncodingWithAllowedCharacters(customAllowedSet)!
+        let customAllowedSet = CharacterSet(charactersIn: "!*'();:@&=+$,/?%#[]").inverted
+        return addingPercentEncoding(withAllowedCharacters: customAllowedSet)!
     }
 }
 
@@ -36,28 +36,28 @@ extension String {
 // NOTE: Those helpers are not used in the code, but let's keep them because they can be handy when debugging.
 
 /// Log the initialization of an object.
-func logInit(object: AnyObject) {
-    print("<INIT> \(unsafeAddressOf(object)) (\(object.dynamicType)) \(object.description)")
+func logInit(_ object: AnyObject) {
+    print("<INIT> \(unsafeAddress(of: object)) (\(object.dynamicType)) \(object.description)")
 }
 
 /// Log the termination ("de-initialization" in Swift terms) of an object.
-func logTerm(object: AnyObject) {
-    print("<TERM> \(unsafeAddressOf(object)) (\(object.dynamicType)) \(object.description)")
+func logTerm(_ object: AnyObject) {
+    print("<TERM> \(unsafeAddress(of: object)) (\(object.dynamicType)) \(object.description)")
 }
 
 // MARK: - Collection shuffling
 // Taken from <http://stackoverflow.com/questions/24026510/how-do-i-shuffle-an-array-in-swift>.
 
-extension CollectionType {
+extension Collection {
     /// Return a copy of `self` with its elements shuffled.
-    func shuffle() -> [Generator.Element] {
+    func shuffle() -> [Iterator.Element] {
         var list = Array(self)
         list.shuffleInPlace()
         return list
     }
 }
 
-extension MutableCollectionType where Index == Int {
+extension MutableCollection where Index == Int {
     /// Shuffle the elements of `self` in-place.
     mutating func shuffleInPlace() {
         // Empty and single-element collections don't shuffle.
