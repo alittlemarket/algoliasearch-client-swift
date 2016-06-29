@@ -157,6 +157,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
+    @discardableResult
     @objc public func listIndexes(_ completionHandler: CompletionHandler) -> Operation {
         return performHTTPQuery("1/indexes", method: .GET, body: nil, hostnames: readHosts, completionHandler: completionHandler)
     }
@@ -167,6 +168,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
+    @discardableResult
     @objc public func deleteIndex(_ indexName: String, completionHandler: CompletionHandler? = nil) -> Operation {
         let path = "1/indexes/\(indexName.urlEncode())"
         return performHTTPQuery(path, method: .DELETE, body: nil, hostnames: writeHosts, completionHandler: completionHandler)
@@ -182,6 +184,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
+    @discardableResult
     @objc public func moveIndex(_ srcIndexName: String, to dstIndexName: String, completionHandler: CompletionHandler? = nil) -> Operation {
         let path = "1/indexes/\(srcIndexName.urlEncode())/operation"
         let request = [
@@ -202,6 +205,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
+    @discardableResult
     @objc public func copyIndex(_ srcIndexName: String, to dstIndexName: String, completionHandler: CompletionHandler? = nil) -> Operation {
         let path = "1/indexes/\(srcIndexName.urlEncode())/operation"
         let request = [
@@ -240,6 +244,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
+    @discardableResult
     @objc public func multipleQueries(_ queries: [IndexQuery], strategy: String?, completionHandler: CompletionHandler? = nil) -> Operation {
         // IMPLEMENTATION NOTE: Objective-C bridgeable alternative.
         var path = "1/indexes/*/queries"
@@ -265,6 +270,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
+    @discardableResult
     public func multipleQueries(_ queries: [IndexQuery], strategy: MultipleQueriesStrategy? = nil, completionHandler: CompletionHandler? = nil) -> Operation {
         // IMPLEMENTATION NOTE: Not Objective-C bridgeable because of enum.
         return multipleQueries(queries, strategy: strategy?.rawValue, completionHandler: completionHandler)
@@ -276,6 +282,7 @@ import Foundation
     /// - parameter completionHandler: Completion handler to be notified of the request's outcome.
     /// - returns: A cancellable operation.
     ///
+    @discardableResult
     @objc public func batch(_ operations: [AnyObject], completionHandler: CompletionHandler? = nil) -> Operation {
         let path = "1/indexes/*/batch"
         let body = ["requests": operations]
