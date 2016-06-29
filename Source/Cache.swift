@@ -34,7 +34,7 @@ class ExpiringCacheItem {
 }
 
 class ExpiringCache {
-    private let cache = Cache()
+    private let cache = Cache<NSString, ExpiringCacheItem>()
     private let expiringTimeInterval: TimeInterval
     
     private var cacheKeys = [String]()
@@ -54,7 +54,7 @@ class ExpiringCache {
     }
     
     func objectForKey(_ key: String) -> [String: AnyObject]? {
-        if let object = cache.object(forKey: key) as? ExpiringCacheItem {
+        if let object = cache.object(forKey: key) {
             let timeSinceCache = abs(object.expiringCacheItemDate.timeIntervalSinceNow)
             if timeSinceCache > expiringTimeInterval {
                 cache.removeObject(forKey: key)
@@ -80,7 +80,7 @@ class ExpiringCache {
         var tmp = [String]()
         
         for key in cacheKeys {
-            if let object = cache.object(forKey: key) as? ExpiringCacheItem {
+            if let object = cache.object(forKey: key) {
                 let timeSinceCache = abs(object.expiringCacheItemDate.timeIntervalSinceNow)
                 if timeSinceCache > expiringTimeInterval {
                     cache.removeObject(forKey: key)
