@@ -452,6 +452,7 @@ import Foundation
         let index: Index
         let query: Query
         let completionHandler: CompletionHandler?
+        var currentOperation: Operation?
         
         init(index: Index, query: Query, completionHandler: CompletionHandler?) {
             self.index = index
@@ -461,10 +462,11 @@ import Foundation
         
         override func start() {
             super.start()
-            index.browse(query, completionHandler: self.handleResult)
+            self.currentOperation = index.browse(query, completionHandler: self.handleResult)
         }
         
         private func handleResult(_ content: [String: AnyObject]?, error: NSError?) {
+            self.currentOperation = nil
             if self.isCancelled {
                 return
             }
@@ -480,7 +482,8 @@ import Foundation
                         }
                     }
                     // Delete the objects.
-                    self.index.deleteObjects(objectIDs, completionHandler: { (content, error) in
+                    currentOperation = self.index.deleteObjects(objectIDs, completionHandler: { (content, error) in
+                        self.currentOperation = nil
                         if self.isCancelled {
                             return
                         }
@@ -488,7 +491,8 @@ import Foundation
                         if finalError == nil {
                             if let taskID = content?["taskID"] as? Int {
                                 // Wait for the deletion to be effective.
-                                self.index.waitTask(taskID, completionHandler: { (content, error) in
+                                self.currentOperation = self.index.waitTask(taskID, completionHandler: { (content, error) in
+                                    self.currentOperation = nil
                                     if self.isCancelled {
                                         return
                                     }
@@ -496,7 +500,7 @@ import Foundation
                                         self.finish(content, error: error)
                                     } else {
                                         // Browse again *from the beginning*, since the deletion invalidated the cursor.
-                                        self.index.browse(self.query, completionHandler: self.handleResult)
+                                        self.currentOperation = self.index.browse(self.query, completionHandler: self.handleResult)
                                     }
                                 })
                             } else {
@@ -514,6 +518,11 @@ import Foundation
             if finalError != nil {
                 self.finish(nil, error: finalError)
             }
+        }
+        
+        override func cancel() {
+            currentOperation?.cancel()
+            super.cancel()
         }
         
         private func finish(_ content: [String: AnyObject]?, error: NSError?) {
