@@ -384,6 +384,7 @@ import Foundation
         let completionHandler: CompletionHandler
         let path: String
         var iteration: Int = 0
+        var pollTaskOperation: Operation?
         
         static let BASE_DELAY = 0.1     ///< Minimum wait delay.
         static let MAX_DELAY  = 5.0     ///< Maximum wait delay.
@@ -405,8 +406,9 @@ import Foundation
                 finish()
             }
             iteration += 1
-            index.client.performHTTPQuery(path, method: .GET, body: nil, hostnames: index.client.writeHosts) {
+            pollTaskOperation = index.client.performHTTPQuery(path, method: .GET, body: nil, hostnames: index.client.writeHosts) {
                 (content, error) -> Void in
+                self.pollTaskOperation = nil
                 if let content = content {
                     if (content["status"] as? String) == "published" {
                         if !self.isCancelled {
@@ -426,6 +428,11 @@ import Foundation
                     self.finish()
                 }
             }
+        }
+        
+        override func cancel() {
+            pollTaskOperation?.cancel()
+            super.cancel()
         }
     }
 
