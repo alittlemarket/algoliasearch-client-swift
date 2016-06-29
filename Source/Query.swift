@@ -923,8 +923,8 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
             if fields.count < 1 || fields.count > 2 {
                 continue
             }
-            if let name = fields[0].stringByRemovingPercentEncoding {
-                let value: String? = fields.count >= 2 ? fields[1].stringByRemovingPercentEncoding : nil
+            if let name = fields[0].removingPercentEncoding {
+                let value: String? = fields.count >= 2 ? fields[1].removingPercentEncoding : nil
                 if value == nil {
                     query.parameters.removeValue(forKey: name)
                 } else {
