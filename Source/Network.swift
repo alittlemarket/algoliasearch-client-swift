@@ -31,20 +31,3 @@ enum HTTPMethod: String {
     case DELETE = "DELETE"
 }
 
-/// Abstraction of `NSURLSession`.
-/// Only for the sake of unit tests.
-protocol URLSession {
-    func dataTaskWithRequest(_ request: URLRequest, completionHandler: (Data?, URLResponse?, NSError?) -> Void) -> URLSessionDataTask
-}
-
-extension AlgoliaSearch.URLSession {
-  internal func dataTaskWithRequest(_ request: URLRequest, completionHandler: (Data?, URLResponse?, NSError?) -> Void) -> URLSessionDataTask {
-    assertionFailure("method dataTaskWithRequest must be implemented")
-    return URLSessionDataTask()
-  }
-}
-
-// Convince the compiler that NSURLSession does implements our custom protocol.
-extension Foundation.URLSession: AlgoliaSearch.URLSession {
-}
-

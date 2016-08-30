@@ -30,7 +30,7 @@ import Foundation
 /// calls into a high-level operation. This operation can be cancelled by the user.
 ///
 class Request: AsyncOperation {
-    let session: URLSession
+    let session: Foundation.URLSession
     
     /// Request method.
     let method: HTTPMethod
@@ -130,10 +130,10 @@ class Request: AsyncOperation {
         assert(_executing)
         let request = createRequest(nextHostIndex)
         nextHostIndex = (nextHostIndex + 1) % hosts.count
-        task = session.dataTaskWithRequest(request) {
-            (data: Data?, response: URLResponse?, error: NSError?) in
+        task = session.dataTask(with: request as URLRequest, completionHandler: { (data, response, error) in
+            
             var json: [String: AnyObject]?
-            var finalError: NSError? = error
+            var finalError = error as? NSError
             // Shortcut in case of cancellation.
             if self.isCancelled {
                 self.finish()
@@ -184,7 +184,7 @@ class Request: AsyncOperation {
             else {
                 self.callCompletion(nil, error: finalError)
             }
-        }
+        })
         task!.resume()
     }
     

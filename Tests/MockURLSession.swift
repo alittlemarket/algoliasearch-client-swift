@@ -58,7 +58,7 @@ public struct MockResponse {
 
 /// A replacement for `NSURLSession` used for mocking network requests.
 ///
-open class MockURLSession: AlgoliaSearch.URLSession {
+open class MockURLSession: Foundation.URLSession {
     /// Predefined set of responses for the specified URLs.
     open var responses: [String: MockResponse] = [String: MockResponse]()
     
@@ -67,7 +67,8 @@ open class MockURLSession: AlgoliaSearch.URLSession {
     
     let defaultResponse = MockResponse(error: NSError(domain: NSURLErrorDomain, code: NSURLErrorResourceUnavailable, userInfo: nil))
     
-    open func dataTaskWithRequest(_ request: URLRequest, completionHandler:  @escaping (Data?, URLResponse?, NSError?) -> Void) -> URLSessionDataTask {
+    open override func dataTask(with request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
+        
         let details = responses[request.url!.absoluteString] ?? defaultResponse
         let task = MockURLSessionDataTask(request: request, details: details, completionHandler: completionHandler)
         task.cancellable = self.cancellable
