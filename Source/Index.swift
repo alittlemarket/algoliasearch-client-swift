@@ -89,9 +89,9 @@ import Foundation
         var requests = [AnyObject]()
         requests.reserveCapacity(objects.count)
         for object in objects {
-            requests.append(["action": "addObject", "body": object])
+            requests.append(["action": "addObject", "body": object] as AnyObject)
         }
-        let request = ["requests": requests]
+        let request = ["requests": requests as AnyObject]
         
         return client.performHTTPQuery(path, method: .POST, body: request, hostnames: client.writeHosts, completionHandler: completionHandler)
     }
@@ -121,9 +121,9 @@ import Foundation
         var requests = [AnyObject]()
         requests.reserveCapacity(objectIDs.count)
         for id in objectIDs {
-            requests.append(["action": "deleteObject", "objectID": id])
+            requests.append(["action": "deleteObject", "objectID": id] as AnyObject)
         }
-        let request = ["requests": requests]
+        let request = ["requests": requests as AnyObject]
         
         return client.performHTTPQuery(path, method: .POST, body: request, hostnames: client.writeHosts, completionHandler: completionHandler)
     }
@@ -168,9 +168,9 @@ import Foundation
         var requests = [AnyObject]()
         requests.reserveCapacity(objectIDs.count)
         for id in objectIDs {
-            requests.append(["indexName": indexName, "objectID": id])
+            requests.append(["indexName": indexName, "objectID": id] as AnyObject)
         }
-        let request = ["requests": requests]
+        let request = ["requests": requests as AnyObject]
         
         return client.performHTTPQuery(path, method: .POST, body: request, hostnames: client.readHosts, completionHandler: completionHandler)
     }
@@ -203,11 +203,11 @@ import Foundation
         for object in objects {
             requests.append([
                 "action": "partialUpdateObject",
-                "objectID": object["objectID"] as! String,
+                "objectID": object["objectID"],
                 "body": object
-            ])
+            ] as AnyObject)
         }
-        let request = ["requests": requests]
+        let request = ["requests": requests as AnyObject]
         
         return client.performHTTPQuery(path, method: .POST, body: request, hostnames: client.writeHosts, completionHandler: completionHandler)
     }
@@ -240,11 +240,11 @@ import Foundation
         for object in objects {
             requests.append([
                 "action": "updateObject",
-                "objectID": object["objectID"] as! String,
+                "objectID": object["objectID"],
                 "body": object
-            ])
+            ] as AnyObject)
         }
-        let request = ["requests": requests]
+        let request = ["requests": requests as AnyObject]
         
         return client.performHTTPQuery(path, method: .POST, body: request, hostnames: client.writeHosts, completionHandler: completionHandler)
     }
@@ -258,7 +258,7 @@ import Foundation
     @discardableResult
     @objc public func search(_ query: Query, completionHandler: CompletionHandler) -> Operation {
         let path = "1/indexes/\(urlEncodedIndexName)/query"
-        let request = ["params": query.build()]
+        let request = ["params": query.build() as AnyObject]
         
         // First try the in-memory query cache.
         let cacheKey = "\(path)_body_\(request)"
@@ -266,9 +266,9 @@ import Foundation
             // We *have* to return something, so we create a completionHandler operation.
             // Note that its execution will be deferred until the next iteration of the main run loop.
             let operation = BlockOperation() {
-                completionHandler(content: content, error: nil)
+                completionHandler(content, nil)
             }
-            OperationQueue.main().addOperation(operation)
+            OperationQueue.main.addOperation(operation)
             return operation
         }
         // Otherwise, run an online query.
@@ -278,9 +278,9 @@ import Foundation
                 assert(content != nil || error != nil)
                 if content != nil {
                     self.searchCache?.setObject(content!, forKey: cacheKey)
-                    completionHandler(content: content, error: error)
+                    completionHandler(content, error)
                 } else {
-                    completionHandler(content: content, error: error)
+                    completionHandler(content, error)
                 }
             }
         }
@@ -348,7 +348,7 @@ import Foundation
     @discardableResult
     @objc public func batch(_ operations: [[String: AnyObject]], completionHandler: CompletionHandler? = nil) -> Operation {
         let path = "1/indexes/\(urlEncodedIndexName)/batch"
-        let body = ["requests": operations]
+        let body = ["requests": operations as AnyObject]
         return client.performHTTPQuery(path, method: .POST, body: body, hostnames: client.writeHosts, completionHandler: completionHandler)
     }
     
@@ -364,7 +364,7 @@ import Foundation
     @objc public func browse(_ query: Query, completionHandler: CompletionHandler) -> Operation {
         let path = "1/indexes/\(urlEncodedIndexName)/browse"
         let body = [
-            "params": query.build()
+            "params": query.build() as AnyObject
         ]
         return client.performHTTPQuery(path, method: .POST, body: body, hostnames: client.readHosts, completionHandler: completionHandler)
     }
@@ -433,7 +433,7 @@ import Foundation
                 if let content = content {
                     if (content["status"] as? String) == "published" {
                         if !self.isCancelled {
-                            self.completionHandler(content: content, error: nil)
+                            self.completionHandler(content, nil)
                         }
                         self.finish()
                     } else {
@@ -444,7 +444,7 @@ import Foundation
                     }
                 } else {
                     if !self.isCancelled {
-                        self.completionHandler(content: content, error: error)
+                        self.completionHandler(content, error)
                     }
                     self.finish()
                 }
@@ -549,7 +549,7 @@ import Foundation
         
         private func finish(_ content: [String: AnyObject]?, error: NSError?) {
             if !isCancelled {
-                self.completionHandler?(content: nil, error: error)
+                self.completionHandler?(nil, error)
             }
             self.finish()
         }
@@ -599,7 +599,7 @@ import Foundation
                 }
             }
             assert(finalContent != nil || finalError != nil)
-            completionHandler(content: finalContent, error: finalError)
+            completionHandler(finalContent, finalError)
         })
         return operation
     }
@@ -616,7 +616,7 @@ import Foundation
         // Following answers are just used for their facet counts.
         var disjunctiveFacetCounts = [String: AnyObject]()
         for i in 1..<results.count { // for each answer (= each disjunctive facet)
-            guard let result = results[i] as? [String: AnyObject], allFacetCounts = result["facets"] as? [String: [String: AnyObject]] else {
+            guard let result = results[i] as? [String: AnyObject], let allFacetCounts = result["facets"] as? [String: [String: AnyObject]] else {
                 throw NSError(domain: Client.ErrorDomain, code: StatusCode.invalidResponse.rawValue, userInfo: [NSLocalizedDescriptionKey: "Invalid results in response"])
             }
             // NOTE: Iterating, but there should be just one item.
@@ -627,15 +627,15 @@ import Foundation
                     if let refinedValues = refinements[facetName] {
                         for refinedValue in refinedValues {
                             if facetCounts[refinedValue] == nil {
-                                newFacetCounts[refinedValue] = 0
+                                newFacetCounts[refinedValue] = 0 as AnyObject
                             }
                         }
                     }
                 }
-                disjunctiveFacetCounts[facetName] = newFacetCounts
+                disjunctiveFacetCounts[facetName] = newFacetCounts as AnyObject
             }
         }
-        mainContent["disjunctiveFacets"] = disjunctiveFacetCounts
+        mainContent["disjunctiveFacets"] = disjunctiveFacetCounts as AnyObject
         return mainContent
     }
     
@@ -657,13 +657,13 @@ import Foundation
                 for facetValue in facetValues {
                     disjunctiveOperator.append("\(facetName):\(facetValue)")
                 }
-                facetFilters.append(disjunctiveOperator)
+                facetFilters.append(disjunctiveOperator as AnyObject)
             }
                 // Conjunctive facet: AND all values with the rest of the filters.
             else {
                 assert(facetName != excludedFacet)
                 for facetValue in facetValues {
-                    facetFilters.append("\(facetName):\(facetValue)")
+                    facetFilters.append("\(facetName):\(facetValue)" as AnyObject)
                 }
             }
         }

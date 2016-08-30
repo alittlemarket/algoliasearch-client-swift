@@ -163,7 +163,7 @@ class Request: AsyncOperation {
                     
                     // Get the error message from JSON if available.
                     if let errorMessage = json?["message"] as? String {
-                        userInfo[NSLocalizedDescriptionKey] = errorMessage
+                        userInfo[NSLocalizedDescriptionKey] = errorMessage as AnyObject
                     }
                     
                     finalError = NSError(domain: Client.ErrorDomain, code: httpResponse.statusCode, userInfo: userInfo)
@@ -193,7 +193,7 @@ class Request: AsyncOperation {
     private func callCompletion(_ content: [String: AnyObject]?, error: NSError?) {
         assert(!_finished)
         if completion != nil && !_cancelled {
-            completion!(content: content, error: error)
+            completion!(content, error)
         }
         finish()
     }

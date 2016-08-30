@@ -35,7 +35,7 @@ public struct MockResponse {
     public init(statusCode: Int, jsonBody: AnyObject) {
         self.statusCode = statusCode
         self.headers = nil
-        self.data = try? JSONSerialization.data(withJSONObject: jsonBody, options: []) ?? Data()
+        self.data = try? JSONSerialization.data(withJSONObject: jsonBody, options: []) 
         self.error = nil
     }
     
@@ -58,17 +58,17 @@ public struct MockResponse {
 
 /// A replacement for `NSURLSession` used for mocking network requests.
 ///
-public class MockURLSession: AlgoliaSearch.URLSession {
+open class MockURLSession: AlgoliaSearch.URLSession {
     /// Predefined set of responses for the specified URLs.
-    public var responses: [String: MockResponse] = [String: MockResponse]()
+    open var responses: [String: MockResponse] = [String: MockResponse]()
     
     /// Whether network requests can be cancelled.
-    public var cancellable: Bool = true
+    open var cancellable: Bool = true
     
     let defaultResponse = MockResponse(error: NSError(domain: NSURLErrorDomain, code: NSURLErrorResourceUnavailable, userInfo: nil))
     
-    public func dataTaskWithRequest(_ request: URLRequest, completionHandler: (Data?, URLResponse?, NSError?) -> Void) -> URLSessionDataTask {
-        let details = responses[request.url!.absoluteString!] ?? defaultResponse
+    open func dataTaskWithRequest(_ request: URLRequest, completionHandler:  @escaping (Data?, URLResponse?, NSError?) -> Void) -> URLSessionDataTask {
+        let details = responses[request.url!.absoluteString] ?? defaultResponse
         let task = MockURLSessionDataTask(request: request, details: details, completionHandler: completionHandler)
         task.cancellable = self.cancellable
         return task
@@ -76,7 +76,7 @@ public class MockURLSession: AlgoliaSearch.URLSession {
 }
 
 /// A mock replacement for `NSURLSessionDataTask`.
-public class MockURLSessionDataTask: URLSessionDataTask {
+open class MockURLSessionDataTask: URLSessionDataTask {
     typealias CompletionHandler = (Data?, URLResponse?, NSError?) -> Void
 
     /// Response to answer
@@ -97,7 +97,7 @@ public class MockURLSessionDataTask: URLSessionDataTask {
         self.completionHandler = completionHandler
     }
     
-    override public func resume() {
+    override open func resume() {
         DispatchQueue.main.async {
             // Do not call any delegate method if cancelled.
             if self.cancelled {
@@ -117,7 +117,7 @@ public class MockURLSessionDataTask: URLSessionDataTask {
         }
     }
     
-    override public func cancel() {
+    override open func cancel() {
         if cancellable {
             cancelled = true
         }

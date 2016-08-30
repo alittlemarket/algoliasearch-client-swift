@@ -505,11 +505,11 @@ class QueryTests: XCTestCase {
         var query2 = Query.parse(query1.build())
         XCTAssertEqual(query2.aroundRadius, 987)
         
-        query1.aroundRadius = Query.aroundRadiusAll
-        XCTAssertEqual(query1.aroundRadius, Query.aroundRadiusAll)
+        query1.aroundRadius = NSNumber(value:Query.aroundRadiusAll)
+        XCTAssertEqual(query1.aroundRadius, NSNumber(value:Query.aroundRadiusAll))
         XCTAssertEqual(query1["aroundRadius"], "all")
         query2 = Query.parse(query1.build())
-        XCTAssertEqual(query2.aroundRadius, Query.aroundRadiusAll)
+        XCTAssertEqual(query2.aroundRadius, NSNumber(value:Query.aroundRadiusAll))
     }
     
     func test_aroundLatLngViaIP() {
@@ -563,7 +563,7 @@ class QueryTests: XCTestCase {
     }
 
     func test_tagFilters() {
-        let VALUE: [AnyObject] = ["tag1", ["tag2", "tag3"]]
+        let VALUE: [AnyObject] = ["tag1" as AnyObject, ["tag2", "tag3"] as AnyObject] as [AnyObject]
         let query1 = Query()
         XCTAssertNil(query1.tagFilters)
         query1.tagFilters = VALUE
@@ -574,7 +574,7 @@ class QueryTests: XCTestCase {
     }
     
     func test_facetFilters() {
-        let VALUE: [AnyObject] = [["category:Book", "category:Movie"], "author:John Doe"]
+        let VALUE: [AnyObject] = [["category:Book", "category:Movie"] as AnyObject, "author:John Doe" as AnyObject]
         let query1 = Query()
         XCTAssertNil(query1.facetFilters)
         query1.facetFilters = VALUE
@@ -597,20 +597,20 @@ class QueryTests: XCTestCase {
     func test_removeStopWords() {
         let query1 = Query()
         XCTAssertNil(query1.removeStopWords)
-        query1.removeStopWords = true
+        query1.removeStopWords = true as AnyObject
         XCTAssertEqual(query1.removeStopWords as? Bool, true)
         XCTAssertEqual(query1["removeStopWords"], "true")
         var query2 = Query.parse(query1.build())
         XCTAssertEqual(query2.removeStopWords as? Bool, true)
 
-        query1.removeStopWords = false
+        query1.removeStopWords = false as AnyObject
         XCTAssertEqual(query1.removeStopWords as? Bool, false)
         XCTAssertEqual(query1["removeStopWords"], "false")
         query2 = Query.parse(query1.build())
         XCTAssertEqual(query2.removeStopWords as? Bool, false)
 
         let VALUE = ["de", "es", "fr"]
-        query1.removeStopWords = VALUE
+        query1.removeStopWords = VALUE as AnyObject
         XCTAssertEqual(query1.removeStopWords as! [String], VALUE)
         XCTAssertEqual(query1["removeStopWords"], "de,es,fr")
         query2 = Query.parse(query1.build())
@@ -638,7 +638,7 @@ class QueryTests: XCTestCase {
     }
     
     func test_numericFilters() {
-        let VALUE: [AnyObject] = ["code=1", ["price:0 to 10", "price:1000 to 2000"]]
+        let VALUE: [AnyObject] = ["code=1" as AnyObject, ["price:0 to 10", "price:1000 to 2000"] as AnyObject]
         let query1 = Query()
         XCTAssertNil(query1.numericFilters)
         query1.numericFilters = VALUE

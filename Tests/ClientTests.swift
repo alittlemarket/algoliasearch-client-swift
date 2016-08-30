@@ -27,52 +27,52 @@ import AlgoliaSearch
 class ClientTests: XCTestCase {
     let expectationTimeout: TimeInterval = 100
     
-    var client: Client!
-    var index: Index!
+    var alogClient: AlgoliaSearch.Client!
+    var algoIndex: AlgoliaSearch.Index!
     
     override func setUp() {
         super.setUp()
-        let appID = ProcessInfo.processInfo().environment["ALGOLIA_APPLICATION_ID"] ?? APP_ID
-        let apiKey = ProcessInfo.processInfo().environment["ALGOLIA_API_KEY"] ?? API_KEY
-        client = AlgoliaSearch.Client(appID: appID, apiKey: apiKey)
-        index = client.getIndex(safeIndexName("algol?à-swift"))
+        let appID = ProcessInfo.processInfo.environment["ALGOLIA_APPLICATION_ID"] ?? APP_ID
+        let apiKey = ProcessInfo.processInfo.environment["ALGOLIA_API_KEY"] ?? API_KEY
+        alogClient = AlgoliaSearch.Client(appID: appID, apiKey: apiKey)
+        algoIndex = alogClient.getIndex(safeIndexName("algol?à-swift"))
         
-        let expectation = self.expectation(withDescription: "Delete index")
-        client.deleteIndex(index.indexName, completionHandler: { (content, error) -> Void in
+        let expectation = self.expectation(description: "Delete index")
+        alogClient.deleteIndex(algoIndex.indexName, completionHandler: { (content, error) -> Void in
             XCTAssertNil(error, "Error during deleteIndex: \(error?.description)")
             expectation.fulfill()
         })
         
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     override func tearDown() {
         super.tearDown()
         
-        let expectation = self.expectation(withDescription: "Delete index")
-        client.deleteIndex(index.indexName, completionHandler: { (content, error) -> Void in
+        let expectation = self.expectation(description: "Delete index")
+        alogClient.deleteIndex(algoIndex.indexName, completionHandler: { (content, error) -> Void in
             XCTAssertNil(error, "Error during deleteIndex: \(error?.description)")
             expectation.fulfill()
         })
         
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     func testListIndexes() {
-        let expectation = self.expectation(withDescription: "testListIndexes")
+        let expectation = self.expectation(description: "testListIndexes")
         let object = ["city": "San Francisco", "objectID": "a/go/?à"]
         
-        index.addObject(object, completionHandler: { (content, error) -> Void in
+        self.algoIndex.addObject(object as [String : AnyObject], completionHandler: { (content, error) -> Void in
             if let error = error {
                 XCTFail("Error during addObject: \(error)")
                 expectation.fulfill()
             } else {
-                self.index.waitTask(content!["taskID"] as! Int, completionHandler: { (content, error) -> Void in
+                self.algoIndex.waitTask(content!["taskID"] as! Int, completionHandler: { (content, error) -> Void in
                     if let error = error {
                         XCTFail("Error during waitTask: \(error)")
                         expectation.fulfill()
                     } else {
-                        self.client.listIndexes({ (content, error) -> Void in
+                        self.alogClient.listIndexes({ (content, error) -> Void in
                             if let error = error {
                                 XCTFail("Error during listIndexes: \(error)")
                             } else {
@@ -80,7 +80,7 @@ class ClientTests: XCTestCase {
                                 
                                 var found = false
                                 for item in items {
-                                    if (item["name"] as! String) == self.index.indexName {
+                                    if (item["name"] as! String) == self.algoIndex.indexName {
                                         found = true
                                         break
                                     }
@@ -96,36 +96,36 @@ class ClientTests: XCTestCase {
             }
         })
         
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     func testMoveIndex() {
-        let expecation = expectation(withDescription: "testMoveIndex")
+        let expecation = expectation(description: "testMoveIndex")
         let object = ["city": "San Francisco", "objectID": "a/go/?à"]
         
-        index.addObject(object, completionHandler: { (content, error) -> Void in
+        self.algoIndex.addObject(object as [String : AnyObject], completionHandler: { (content, error) -> Void in
             if let error = error {
                 XCTFail("Error during addObject: \(error)")
                 expecation.fulfill()
             } else {
-                self.index.waitTask(content!["taskID"] as! Int, completionHandler: { (content, error) -> Void in
+                self.algoIndex.waitTask(content!["taskID"] as! Int, completionHandler: { (content, error) -> Void in
                     if let error = error {
                         XCTFail("Error during waitTask: \(error)")
                         expecation.fulfill()
                     } else {
                         XCTAssertEqual((content!["status"] as! String), "published", "Wait task failed")
                         
-                        self.client.moveIndex(self.index.indexName, to: safeIndexName("algol?à-swift2"), completionHandler: { (content, error) -> Void in
+                        self.alogClient.moveIndex(self.algoIndex.indexName, to: safeIndexName("algol?à-swift2"), completionHandler: { (content, error) -> Void in
                             if let error = error {
                                 XCTFail("Error during moveIndex: \(error)")
                                 expecation.fulfill()
                             } else {
-                                self.index.waitTask(content!["taskID"] as! Int, completionHandler: { (content, error) -> Void in
+                                self.algoIndex.waitTask(content!["taskID"] as! Int, completionHandler: { (content, error) -> Void in
                                     if let error = error {
                                         XCTFail("Error during waitTask: \(error)")
                                         expecation.fulfill()
                                     } else {
-                                        let dstIndex = self.client.getIndex(safeIndexName("algol?à-swift2"))
+                                        let dstIndex = self.alogClient.getIndex(safeIndexName("algol?à-swift2"))
                                         dstIndex.search(Query(), completionHandler: { (content, error) -> Void in
                                             if let error = error {
                                                 XCTFail("Error during search: \(error)")
@@ -145,25 +145,25 @@ class ClientTests: XCTestCase {
             }
         })
         
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
         
-        let deleteExpectation = expectation(withDescription: "Delete index")
-        client.deleteIndex(safeIndexName("algol?à-swift2"), completionHandler: { (content, error) -> Void in
+        let deleteExpectation = expectation(description: "Delete index")
+        alogClient.deleteIndex(safeIndexName("algol?à-swift2"), completionHandler: { (content, error) -> Void in
             XCTAssertNil(error, "Error during deleteIndex: \(error?.description)")
             deleteExpectation.fulfill()
         })
         
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     func testCopyIndex() {
-        let expecation = expectation(withDescription: "testCopyIndex")
-        let srcIndexExpectation = expectation(withDescription: "srcIndex")
-        let dstIndexExpectation = expectation(withDescription: "dstIndex")
+        let expecation = expectation(description: "testCopyIndex")
+        let srcIndexExpectation = expectation(description: "srcIndex")
+        let dstIndexExpectation = expectation(description: "dstIndex")
         
         let object = ["city": "San Francisco", "objectID": "a/go/?à"]
         
-        index.addObject(object, completionHandler: { (content, error) -> Void in
+        self.algoIndex.addObject(object as [String : AnyObject], completionHandler: { (content, error) -> Void in
             guard let taskID = content?["taskID"] as? Int else {
                 XCTFail("Error fetching taskID")
                 expecation.fulfill()
@@ -174,23 +174,23 @@ class ClientTests: XCTestCase {
                 XCTFail("Error during addObject: \(error)")
                 expecation.fulfill()
             } else {
-                self.index.waitTask(taskID, completionHandler: { (content, error) -> Void in
+                self.algoIndex.waitTask(taskID, completionHandler: { (content, error) -> Void in
                     if let error = error {
                         XCTFail("Error during waitTask: \(error)")
                         expecation.fulfill()
                     } else {
                         XCTAssertEqual((content!["status"] as! String), "published", "Wait task failed")
                         
-                        self.client.copyIndex(self.index.indexName, to: safeIndexName("algol?à-swift2"), completionHandler: { (content, error) -> Void in
+                        self.alogClient.copyIndex(self.algoIndex.indexName, to: safeIndexName("algol?à-swift2"), completionHandler: { (content, error) -> Void in
                             if let error = error {
                                 XCTFail("Error during copyIndex: \(error)")
                                 expecation.fulfill()
                             } else {
-                                self.index.waitTask(content!["taskID"] as! Int, completionHandler: { (content, error) -> Void in
+                                self.algoIndex.waitTask(content!["taskID"] as! Int, completionHandler: { (content, error) -> Void in
                                     if let error = error {
                                         XCTFail("Error during waitTask: \(error)")
                                     } else {
-                                        self.index.search(Query(), completionHandler: { (content, error) -> Void in
+                                        self.algoIndex.search(Query(), completionHandler: { (content, error) -> Void in
                                             if let error = error {
                                                 XCTFail("Error during search: \(error)")
                                             } else {
@@ -201,7 +201,7 @@ class ClientTests: XCTestCase {
                                             srcIndexExpectation.fulfill()
                                         })
                                         
-                                        let dstIndex = self.client.getIndex(safeIndexName("algol?à-swift2"))
+                                        let dstIndex = self.alogClient.getIndex(safeIndexName("algol?à-swift2"))
                                         dstIndex.search(Query(), completionHandler: { (content, error) -> Void in
                                             if let error = error {
                                                 XCTFail("Error during search: \(error)")
@@ -223,34 +223,34 @@ class ClientTests: XCTestCase {
             }
         })
         
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
         
-        let deleteExpectation = expectation(withDescription: "Delete index")
-        client.deleteIndex(safeIndexName("algol?à-swift2"), completionHandler: { (content, error) -> Void in
+        let deleteExpectation = expectation(description: "Delete index")
+        alogClient.deleteIndex(safeIndexName("algol?à-swift2"), completionHandler: { (content, error) -> Void in
             XCTAssertNil(error, "Error during deleteIndex: \(error?.description)")
             deleteExpectation.fulfill()
         })
         
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     func testMultipleQueries() {
-        let expectation = self.expectation(withDescription: "testMultipleQueries")
+        let expectation = self.expectation(description: "testMultipleQueries")
         let object = ["city": "San Francisco"]
         
-        index.addObject(object, completionHandler: { (content, error) -> Void in
+        self.algoIndex.addObject(object as [String : AnyObject], completionHandler: { (content, error) -> Void in
             if let error = error {
                 XCTFail("Error during addObject: \(error)")
                 expectation.fulfill()
             } else {
-                self.index.waitTask(content!["taskID"] as! Int, completionHandler: { (content, error) -> Void in
+                self.algoIndex.waitTask(content!["taskID"] as! Int, completionHandler: { (content, error) -> Void in
                     if let error = error {
                         XCTFail("Error during waitTask: \(error)")
                         expectation.fulfill()
                     } else {
-                        let queries = [IndexQuery(index: self.index, query: Query())]
+                        let queries = [IndexQuery(index: self.algoIndex, query: Query())]
                         
-                        self.client.multipleQueries(queries, completionHandler: { (content, error) -> Void in
+                        self.alogClient.multipleQueries(queries, completionHandler: { (content, error) -> Void in
                             if let error = error {
                                 XCTFail("Error during multipleQueries: \(error)")
                             } else {
@@ -266,60 +266,60 @@ class ClientTests: XCTestCase {
             }
         })
         
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     func testHeaders() {
         // Make a call with a valid API key.
-        let expectation1 = expectation(withDescription: "Valid API key")
-        self.client.listIndexes {
+        let expectation1 = expectation(description: "Valid API key")
+        self.alogClient.listIndexes {
             (content, error) -> Void in
             XCTAssertNil(error)
             expectation1.fulfill()
         }
         
         // Override the API key and check the call fails.
-        self.client.headers["X-Algolia-API-Key"] = "NOT_A_VALID_API_KEY"
-        let expectation2 = expectation(withDescription: "Invalid API key")
-        self.client.listIndexes {
+        self.alogClient.headers["X-Algolia-API-Key"] = "NOT_A_VALID_API_KEY"
+        let expectation2 = expectation(description: "Invalid API key")
+        self.alogClient.listIndexes {
             (content, error) -> Void in
             XCTAssertNotNil(error)
             expectation2.fulfill()
         }
 
         // Restore the valid API key (otherwise tear down will fail).
-        self.client.headers["X-Algolia-API-Key"] = self.client.apiKey
+        self.alogClient.headers["X-Algolia-API-Key"] = self.alogClient.apiKey
         
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     func testBatch() {
-        let expectation = self.expectation(withDescription: #function)
+        let expectation = self.expectation(description: #function)
         let actions = [
             [
-                "indexName": index.indexName,
+                "indexName": algoIndex.indexName,
                 "action": "addObject",
                 "body": [ "city": "San Francisco" ]
             ],
             [
-                "indexName": index.indexName,
+                "indexName": algoIndex.indexName,
                 "action": "addObject",
                 "body": [ "city": "Paris" ]
             ]
         ]
-        client.batch(actions) {
+        alogClient.batch(actions as [AnyObject]) {
             (content, error) -> Void in
             if error != nil {
                 XCTFail(error!.localizedDescription)
-            } else if let taskID = (content!["taskID"] as? [String: AnyObject])?[self.index.indexName] as? Int {
+            } else if let taskID = (content!["taskID"] as? [String: AnyObject])?[self.algoIndex.indexName] as? Int {
                 // Wait for the batch to be processed.
-                self.index.waitTask(taskID) {
+                self.algoIndex.waitTask(taskID) {
                     (content, error) in
                     if error != nil {
                         XCTFail(error!.localizedDescription)
                     } else {
                         // Check that objects have been indexed.
-                        self.index.search(Query(query: "Francisco")) {
+                        self.algoIndex.search(Query(query: "Francisco")) {
                             (content, error) in
                             if error != nil {
                                 XCTFail(error!.localizedDescription)
@@ -334,6 +334,6 @@ class ClientTests: XCTestCase {
                 XCTFail("Could not find task ID")
             }
         }
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
 }

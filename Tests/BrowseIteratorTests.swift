@@ -32,22 +32,22 @@ class BrowseIteratorTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        let appID = ProcessInfo.processInfo().environment["ALGOLIA_APPLICATION_ID"] ?? APP_ID
-        let apiKey = ProcessInfo.processInfo().environment["ALGOLIA_API_KEY"] ?? API_KEY
+        let appID = ProcessInfo.processInfo.environment["ALGOLIA_APPLICATION_ID"] ?? APP_ID
+        let apiKey = ProcessInfo.processInfo.environment["ALGOLIA_API_KEY"] ?? API_KEY
         client = AlgoliaSearch.Client(appID: appID, apiKey: apiKey)
         index = client.getIndex(safeIndexName("algol?à-swift"))
         
-        let expectation = self.expectation(withDescription: "Delete index")
+        let expectation = self.expectation(description: "Delete index")
         client.deleteIndex(index.indexName, completionHandler: { (content, error) -> Void in
             XCTAssertNil(error, "Error during deleteIndex: \(error?.description)")
             expectation.fulfill()
         })
         
         // Add a bunch of objects to the index.
-        let expectation2 = self.expectation(withDescription: "Add objects")
+        let expectation2 = self.expectation(description: "Add objects")
         var objects = [[String: AnyObject]]()
         for i in 0...1500 {
-            objects.append(["i": i])
+            objects.append(["i": i as AnyObject])
         }
         index.addObjects(objects) { (content, error) -> Void in
             if error != nil {
@@ -62,23 +62,23 @@ class BrowseIteratorTests: XCTestCase {
                 }
             }
         }
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     override func tearDown() {
         super.tearDown()
         
-        let expectation = self.expectation(withDescription: "Delete index")
+        let expectation = self.expectation(description: "Delete index")
         client.deleteIndex(index.indexName, completionHandler: { (content, error) -> Void in
             XCTAssertNil(error, "Error during deleteIndex: \(error?.description)")
             expectation.fulfill()
         })
         
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     func testNominal() {
-        let expectation = self.expectation(withDescription: #function)
+        let expectation = self.expectation(description: #function)
         var pageCount = 0
         let iterator = BrowseIterator(index: index, query: Query()) { (iterator, content, error) in
             pageCount += 1
@@ -93,7 +93,7 @@ class BrowseIteratorTests: XCTestCase {
             }
         }
         iterator.start()
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
 
     func testCancel() {
@@ -113,7 +113,7 @@ class BrowseIteratorTests: XCTestCase {
         iterator.start()
         // Manually run the run loop for a while to leave a chance to the completion handler to be called.
         // WARNING: We cannot use `waitForExpectationsWithTimeout()`, because a timeout always results in failure.
-        RunLoop.main().run(until: Date().addingTimeInterval(10))
+        RunLoop.main.run(until: Date().addingTimeInterval(10))
     }
 
 }

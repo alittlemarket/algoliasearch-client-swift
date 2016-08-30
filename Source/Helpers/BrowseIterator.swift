@@ -30,7 +30,7 @@ import Foundation
 /// - parameter content:    The content returned by the server, in case of success.
 /// - parameter error:      The error that was encountered, in case of failure.
 ///
-public typealias BrowseIteratorHandler = (iterator: BrowseIterator, content: [String: AnyObject]?, error: NSError?) -> Void
+public typealias BrowseIteratorHandler = (_ iterator: BrowseIterator, _ content: [String: AnyObject]?, _ error: NSError?) -> Void
 
 
 /// Iterator to browse all index content.
@@ -96,7 +96,7 @@ public typealias BrowseIteratorHandler = (iterator: BrowseIterator, content: [St
         request = nil
         cursor = content?["cursor"] as? String
         if !cancelled {
-            completionHandler(iterator: self, content: content, error: error)
+            completionHandler(self, content, error)
             if !cancelled && error == nil && hasNext() {
                 next()
             }

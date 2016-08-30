@@ -112,11 +112,11 @@ import Foundation
         writeHosts = [ "\(appID).algolia.net" ] + fallbackHosts
         
         // WARNING: Those headers cannot be changed for the lifetime of the session.
-        let version = Bundle(for: self.dynamicType).infoDictionary!["CFBundleShortVersionString"] as! String
+        let version = Bundle(for: type(of: self)).infoDictionary!["CFBundleShortVersionString"] as! String
         let fixedHTTPHeaders = [
             "X-Algolia-Application-Id": self.appID
         ]
-        let configuration = URLSessionConfiguration.default()
+        let configuration = URLSessionConfiguration.default
         configuration.httpAdditionalHeaders = fixedHTTPHeaders
         session = Foundation.URLSession(configuration: configuration)
         
@@ -189,10 +189,10 @@ import Foundation
         let path = "1/indexes/\(srcIndexName.urlEncode())/operation"
         let request = [
             "destination": dstIndexName,
-            "operation": "move"
+            "operation": "move" 
         ]
 
-        return performHTTPQuery(path, method: .POST, body: request, hostnames: writeHosts, completionHandler: completionHandler)
+        return performHTTPQuery(path, method: .POST, body: request as [String : AnyObject]?, hostnames: writeHosts, completionHandler: completionHandler)
     }
 
     /// Copy an existing index.
@@ -213,7 +213,7 @@ import Foundation
             "operation": "copy"
         ]
 
-        return performHTTPQuery(path, method: .POST, body: request, hostnames: writeHosts, completionHandler: completionHandler)
+        return performHTTPQuery(path, method: .POST, body: request as [String : AnyObject]?, hostnames: writeHosts, completionHandler: completionHandler)
     }
 
     /// Create a proxy to an Algolia index (no server call required by this method).
@@ -255,11 +255,11 @@ import Foundation
         requests.reserveCapacity(queries.count)
         for query in queries {
             requests.append([
-                "indexName": query.indexName,
-                "params": query.query.build()
+                "indexName": query.indexName as AnyObject,
+                "params": query.query.build() as AnyObject
             ])
         }
-        let request = ["requests": requests]
+        let request = ["requests": requests as AnyObject]
         return performHTTPQuery(path, method: .POST, body: request, hostnames: readHosts, completionHandler: completionHandler)
     }
     
@@ -286,7 +286,7 @@ import Foundation
     @objc public func batch(_ operations: [AnyObject], completionHandler: CompletionHandler? = nil) -> Operation {
         let path = "1/indexes/*/batch"
         let body = ["requests": operations]
-        return performHTTPQuery(path, method: .POST, body: body, hostnames: writeHosts, completionHandler: completionHandler)
+        return performHTTPQuery(path, method: .POST, body: body as [String : AnyObject]?, hostnames: writeHosts, completionHandler: completionHandler)
     }
 
     // MARK: - Network
@@ -297,7 +297,7 @@ import Foundation
             (content: [String: AnyObject]?, error: NSError?) -> Void in
             if completionHandler != nil {
                 DispatchQueue.main.async {
-                    completionHandler!(content: content, error: error)
+                    completionHandler!(content, error)
                 }
             }
         }

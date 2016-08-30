@@ -37,7 +37,14 @@ protocol URLSession {
     func dataTaskWithRequest(_ request: URLRequest, completionHandler: (Data?, URLResponse?, NSError?) -> Void) -> URLSessionDataTask
 }
 
+extension AlgoliaSearch.URLSession {
+  internal func dataTaskWithRequest(_ request: URLRequest, completionHandler: (Data?, URLResponse?, NSError?) -> Void) -> URLSessionDataTask {
+    assertionFailure("method dataTaskWithRequest must be implemented")
+    return URLSessionDataTask()
+  }
+}
+
 // Convince the compiler that NSURLSession does implements our custom protocol.
-extension Foundation.URLSession: URLSession {
+extension Foundation.URLSession: AlgoliaSearch.URLSession {
 }
 

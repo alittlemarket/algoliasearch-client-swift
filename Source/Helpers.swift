@@ -37,12 +37,12 @@ extension String {
 
 /// Log the initialization of an object.
 func logInit(_ object: AnyObject) {
-    print("<INIT> \(unsafeAddress(of: object)) (\(object.dynamicType)) \(object.description)")
+    print("<INIT> \(Unmanaged.passUnretained(object).toOpaque()) (\(type(of: object))) \(object.description)")
 }
 
 /// Log the termination ("de-initialization" in Swift terms) of an object.
 func logTerm(_ object: AnyObject) {
-    print("<TERM> \(unsafeAddress(of: object)) (\(object.dynamicType)) \(object.description)")
+    print("<TERM> \(Unmanaged.passUnretained(object).toOpaque()) (\(type(of: object))) \(object.description)")
 }
 
 // MARK: - Collection shuffling

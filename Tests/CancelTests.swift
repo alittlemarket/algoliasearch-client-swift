@@ -57,7 +57,8 @@ class CancelTests: XCTestCase {
     // Search is a composite operation.
     func testSearch() {
         // NOTE: We use a search request here because it is more complex (in-memory cache involved).
-        session.responses["https://\(client.readHosts[0])/1/indexes/\(FAKE_INDEX_NAME)"] = MockResponse(statusCode: 200, jsonBody: ["hello": "world"])
+        let body = ["hello": "world"] as AnyObject
+        session.responses["https://\(client.readHosts[0])/1/indexes/\(FAKE_INDEX_NAME)"] = MockResponse(statusCode: 200, jsonBody: body)
         let request1 = index.search(Query()) {
             (content, error) -> Void in
             XCTFail("Completion handler should not be called when a request has been cancelled")
@@ -65,7 +66,7 @@ class CancelTests: XCTestCase {
         request1.cancel()
         // Manually run the run loop for a while to leave a chance to the completion handler to be called.
         // WARNING: We cannot use `waitForExpectationsWithTimeout()`, because a timeout always results in failure.
-        RunLoop.main().run(until: Date().addingTimeInterval(3))
+        RunLoop.main.run(until: Date().addingTimeInterval(3))
         XCTAssert(request1.isFinished)
         
         // Run the test again, but this time the session won't actually cancel the (mock) network call.
@@ -76,7 +77,7 @@ class CancelTests: XCTestCase {
             XCTFail("Completion handler should not be called when a request has been cancelled")
         }
         request2.cancel()
-        RunLoop.main().run(until: Date().addingTimeInterval(3))
+        RunLoop.main.run(until: Date().addingTimeInterval(3))
         XCTAssert(request2.isFinished)
     }
     
@@ -84,7 +85,8 @@ class CancelTests: XCTestCase {
     func testWaitTask() {
         // NOTE: We are faking network calls, so we don't need a real task ID!
         let taskID = 666
-        session.responses["https://\(client.writeHosts[0])/1/indexes/\(FAKE_INDEX_NAME)/task/\(taskID)"] = MockResponse(statusCode: 200, jsonBody: ["status": "published", "pendingTask": false])
+      let body = ["status": "published", "pendingTask": false] as AnyObject
+        session.responses["https://\(client.writeHosts[0])/1/indexes/\(FAKE_INDEX_NAME)/task/\(taskID)"] = MockResponse(statusCode: 200, jsonBody: body)
         let request1 = index.waitTask(taskID) {
             (content, error) in
             XCTFail("Completion handler should not be called when a request has been cancelled")
@@ -92,17 +94,18 @@ class CancelTests: XCTestCase {
         request1.cancel()
         // Manually run the run loop for a while to leave a chance to the completion handler to be called.
         // WARNING: We cannot use `waitForExpectationsWithTimeout()`, because a timeout always results in failure.
-        RunLoop.main().run(until: Date().addingTimeInterval(3))
+        RunLoop.main.run(until: Date().addingTimeInterval(3))
         XCTAssert(request1.isFinished)
 
-        session.responses["https://\(client.writeHosts[0])/1/indexes/\(FAKE_INDEX_NAME)/task/\(taskID)"] = MockResponse(statusCode: 200, jsonBody: ["status": "notPublished", "pendingTask": true])
+        let body2 = ["status": "notPublished", "pendingTask": true] as AnyObject
+        session.responses["https://\(client.writeHosts[0])/1/indexes/\(FAKE_INDEX_NAME)/task/\(taskID)"] = MockResponse(statusCode: 200, jsonBody: body2)
         let request2 = index.waitTask(taskID) {
             (content, error) in
             XCTFail("Completion handler should not be called when a request has been cancelled")
         }
-        RunLoop.main().run(until: Date().addingTimeInterval(1))
+        RunLoop.main.run(until: Date().addingTimeInterval(1))
         request2.cancel()
-        RunLoop.main().run(until: Date().addingTimeInterval(3))
+        RunLoop.main.run(until: Date().addingTimeInterval(3))
         XCTAssert(request2.isFinished)
     }
 }

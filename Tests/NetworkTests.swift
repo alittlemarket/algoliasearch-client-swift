@@ -42,6 +42,10 @@ class NetworkTests: XCTestCase {
     
     let session: MockURLSession = MockURLSession()
     
+    let body1 = ["hello": "world"] as AnyObject
+    let body2 = ["message": "Mind your own business"] as AnyObject
+    let body3 = ["something": "else"] as AnyObject
+  
     // Well-known errors:
     
     let TIMEOUT_ERROR = NSError(domain: NSURLErrorDomain, code: NSURLErrorTimedOut, userInfo: nil)
@@ -59,9 +63,9 @@ class NetworkTests: XCTestCase {
     
     /// In case of time-out on one host, check that the next host is tried.
     func testTimeout_OneHost() {
-        let expectation = self.expectation(withDescription: #function)
+        let expectation = self.expectation(description: #function)
         session.responses["https://\(client.readHosts[0])/1/indexes"] = MockResponse(error: TIMEOUT_ERROR)
-        session.responses["https://\(client.readHosts[1])/1/indexes"] = MockResponse(statusCode: 200, jsonBody: ["hello": "world"])
+        session.responses["https://\(client.readHosts[1])/1/indexes"] = MockResponse(statusCode: 200, jsonBody: self.body1)
         client.listIndexes {
             (content, error) -> Void in
             XCTAssertNil(error)
@@ -69,12 +73,12 @@ class NetworkTests: XCTestCase {
             XCTAssertEqual(content?["hello"] as? String, "world")
             expectation.fulfill()
         }
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
 
     /// In case of time-out on all hosts, check that the error is returned.
     func testTimeout_AllHosts() {
-        let expectation = self.expectation(withDescription: #function)
+        let expectation = self.expectation(description: #function)
         for i in 0..<client.writeHosts.count {
             session.responses["https://\(client.readHosts[i])/1/indexes"] = MockResponse(error: TIMEOUT_ERROR)
         }
@@ -86,14 +90,14 @@ class NetworkTests: XCTestCase {
             XCTAssert(error?.code == NSURLErrorTimedOut)
             expectation.fulfill()
         }
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
 
     /// In case of DNS error on one host, check that the next host is tried.
     func testDNSError() {
-        let expectation = self.expectation(withDescription: #function)
+        let expectation = self.expectation(description: #function)
         session.responses["https://\(client.readHosts[0])/1/indexes"] = MockResponse(error: NSError(domain: NSURLErrorDomain, code: NSURLErrorCannotFindHost, userInfo: nil))
-        session.responses["https://\(client.readHosts[1])/1/indexes"] = MockResponse(statusCode: 200, jsonBody: ["hello": "world"])
+        session.responses["https://\(client.readHosts[1])/1/indexes"] = MockResponse(statusCode: 200, jsonBody: self.body1)
         client.listIndexes {
             (content, error) -> Void in
             XCTAssertNil(error)
@@ -101,14 +105,14 @@ class NetworkTests: XCTestCase {
             XCTAssertEqual(content?["hello"] as? String, "world")
             expectation.fulfill()
         }
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     /// In case of server error on one host, check that the next host is tried.
     func testServerError() {
-        let expectation = self.expectation(withDescription: #function)
-        session.responses["https://\(client.readHosts[0])/1/indexes"] = MockResponse(statusCode: 500, jsonBody: ["message": "Mind your own business"])
-        session.responses["https://\(client.readHosts[1])/1/indexes"] = MockResponse(statusCode: 200, jsonBody: ["hello": "world"])
+        let expectation = self.expectation(description: #function)
+        session.responses["https://\(client.readHosts[0])/1/indexes"] = MockResponse(statusCode: 500, jsonBody: self.body2)
+        session.responses["https://\(client.readHosts[1])/1/indexes"] = MockResponse(statusCode: 200, jsonBody: self.body1)
         client.listIndexes {
             (content, error) -> Void in
             XCTAssertNil(error)
@@ -116,14 +120,14 @@ class NetworkTests: XCTestCase {
             XCTAssertEqual(content?["hello"] as? String, "world")
             expectation.fulfill()
         }
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     /// In case of client error, check that the next host is *not* tried.
     func testClientError() {
-        let expectation = self.expectation(withDescription: #function)
-        session.responses["https://\(client.readHosts[0])/1/indexes"] = MockResponse(statusCode: 403, jsonBody: ["message": "Mind your own business"])
-        session.responses["https://\(client.readHosts[1])/1/indexes"] = MockResponse(statusCode: 200, jsonBody: ["hello": "world"])
+        let expectation = self.expectation(description: #function)
+        session.responses["https://\(client.readHosts[0])/1/indexes"] = MockResponse(statusCode: 403, jsonBody: self.body2)
+        session.responses["https://\(client.readHosts[1])/1/indexes"] = MockResponse(statusCode: 200, jsonBody: self.body1)
         client.listIndexes {
             (content, error) -> Void in
             XCTAssertNil(content)
@@ -133,12 +137,12 @@ class NetworkTests: XCTestCase {
             XCTAssertEqual(error?.userInfo[NSLocalizedDescriptionKey] as? String, "Mind your own business")
             expectation.fulfill()
         }
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     /// Test when the server returns a success, but no JSON.
     func testEmptyResponse() {
-        let expectation = self.expectation(withDescription: #function)
+        let expectation = self.expectation(description: #function)
         session.responses["https://\(client.readHosts[0])/1/indexes"] = MockResponse(statusCode: 200, data: Data())
         client.listIndexes {
             (content, error) -> Void in
@@ -148,12 +152,12 @@ class NetworkTests: XCTestCase {
             XCTAssertEqual(error?.code, StatusCode.illFormedResponse.rawValue)
             expectation.fulfill()
         }
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
 
     /// Test when the server returns a success, but ill-formed JSON.
     func testIllFormedResponse() {
-        let expectation = self.expectation(withDescription: #function)
+        let expectation = self.expectation(description: #function)
         session.responses["https://\(client.readHosts[0])/1/indexes"] = MockResponse(statusCode: 200, data: Data(base64Encoded: "U0hPVUxETk9UV09SSw==", options: [])!)
         client.listIndexes {
             (content, error) -> Void in
@@ -163,15 +167,15 @@ class NetworkTests: XCTestCase {
             XCTAssertEqual(error?.code, StatusCode.illFormedResponse.rawValue)
             expectation.fulfill()
         }
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
 
     /// Test when the server returns an error status code, but no JSON.
     func testEmptyErrorResponse() {
-        let expectation = self.expectation(withDescription: #function)
+        let expectation = self.expectation(description: #function)
         session.responses["https://\(client.readHosts[0])/1/indexes"] = MockResponse(statusCode: 403, data: Data())
-        session.responses["https://\(client.readHosts[1])/1/indexes"] = MockResponse(statusCode: 200, jsonBody: ["hello": "world"])
+        session.responses["https://\(client.readHosts[1])/1/indexes"] = MockResponse(statusCode: 200, jsonBody: self.body1)
         client.listIndexes {
             (content, error) -> Void in
             XCTAssertNil(content)
@@ -180,14 +184,14 @@ class NetworkTests: XCTestCase {
             XCTAssertEqual(error?.code, StatusCode.illFormedResponse.rawValue)
             expectation.fulfill()
         }
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
     
     /// Test when the server returns an error status code and valid JSON, but no error message in the JSON.
     func testEmptyErrorMessage() {
-        let expectation = self.expectation(withDescription: #function)
-        session.responses["https://\(client.readHosts[0])/1/indexes"] = MockResponse(statusCode: 403, jsonBody: ["something": "else"])
-        session.responses["https://\(client.readHosts[1])/1/indexes"] = MockResponse(statusCode: 200, jsonBody: ["hello": "world"])
+        let expectation = self.expectation(description: #function)
+        session.responses["https://\(client.readHosts[0])/1/indexes"] = MockResponse(statusCode: 403, jsonBody: self.body3)
+        session.responses["https://\(client.readHosts[1])/1/indexes"] = MockResponse(statusCode: 200, jsonBody: self.body1)
         client.listIndexes {
             (content, error) -> Void in
             XCTAssertNil(content)
@@ -196,6 +200,6 @@ class NetworkTests: XCTestCase {
             XCTAssertEqual(error?.code, 403)
             expectation.fulfill()
         }
-        waitForExpectations(withTimeout: expectationTimeout, handler: nil)
+        waitForExpectations(timeout: expectationTimeout, handler: nil)
     }
 }

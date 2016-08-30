@@ -104,7 +104,7 @@ import Foundation
         self.lng = lng
     }
     
-    public override func isEqual(_ object: AnyObject?) -> Bool {
+    public override func isEqual(_ object: Any?) -> Bool {
         if let rhs = object as? LatLng {
             return self.lat == rhs.lat && self.lng == rhs.lng
         } else {
@@ -131,7 +131,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
         self.p2 = p2
     }
     
-    public override func isEqual(_ object: AnyObject?) -> Bool {
+    public override func isEqual(_ object: Any?) -> Bool {
         if let rhs = object as? GeoRect {
             return self.p1 == rhs.p1 && self.p2 == rhs.p2
         } else {
@@ -150,7 +150,6 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
 ///    Use this approach if the parameter you wish to set is not supported by this class.
 ///
 @objc public class Query : NSObject, NSCopying {
-    
     // MARK: - Low-level (untyped) parameters
     
     /// Parameters, as untyped values.
@@ -304,7 +303,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// attributesToIndex settings are used to search.
     @objc public var restrictSearchableAttributes: [String]? {
         get { return Query.parseStringArray(get("restrictSearchableAttributes")) }
-        set { set("restrictSearchableAttributes", value: Query.buildJSONArray(newValue)) }
+        set { set("restrictSearchableAttributes", value: Query.buildJSONArray(newValue as [AnyObject]?)) }
     }
     
     /// Enable the advanced query syntax.
@@ -331,7 +330,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// subset of searches only.
     @objc public var analyticsTags: [String]? {
         get { return Query.parseStringArray(get("analyticsTags")) }
-        set { set("analyticsTags", value: Query.buildJSONArray(newValue)) }
+        set { set("analyticsTags", value: Query.buildJSONArray(newValue as [AnyObject]?)) }
     }
     
     /// If set to false, this query will not use synonyms defined in configuration.
@@ -359,7 +358,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// appended to the one defined in your index settings.
     @objc public var optionalWords: [String]? {
         get { return Query.parseStringArray(get("optionalWords")) }
-        set { set("optionalWords", value: Query.buildJSONArray(newValue)) }
+        set { set("optionalWords", value: Query.buildJSONArray(newValue as [AnyObject]?)) }
     }
 
     /// Configure the precision of the proximity ranking criterion. By default, the minimum (and best) proximity value
@@ -416,7 +415,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// index setting).
     @objc public var disableTypoToleranceOnAttributes: [String]? {
         get { return Query.parseStringArray(get("disableTypoToleranceOnAttributes")) }
-        set { set("disableTypoToleranceOnAttributes", value: Query.buildJSONArray(newValue)) }
+        set { set("disableTypoToleranceOnAttributes", value: Query.buildJSONArray(newValue as [AnyObject]?)) }
     }
 
     /// Remove stop words from query before executing it.
@@ -439,9 +438,9 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
         get {
             let stringValue = get("removeStopWords")
             if let boolValue = Query.parseBool(stringValue) {
-                return boolValue
+                return boolValue as AnyObject
             } else if let arrayValue = Query.parseStringArray(stringValue) {
-                return arrayValue
+                return arrayValue as AnyObject
             } else {
                 return nil
             }
@@ -562,7 +561,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// By default all attributes are retrieved.
     @objc public var attributesToRetrieve: [String]? {
         get { return Query.parseStringArray(get("attributesToRetrieve")) }
-        set { set("attributesToRetrieve", value: Query.buildJSONArray(newValue)) }
+        set { set("attributesToRetrieve", value: Query.buildJSONArray(newValue as [AnyObject]?)) }
     }
     
     /// List of attributes you want to highlight according to the query. If an attribute has no match for the query,
@@ -574,14 +573,14 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// - `none`: if none of the query terms were found
     @objc public var attributesToHighlight: [String]? {
         get { return Query.parseStringArray(get("attributesToHighlight")) }
-        set { set("attributesToHighlight", value: Query.buildJSONArray(newValue)) }
+        set { set("attributesToHighlight", value: Query.buildJSONArray(newValue as [AnyObject]?)) }
     }
     
     /// List of attributes to snippet alongside the number of words to return (syntax is `attributeName:nbWords`).
     /// By default no snippet is computed.
     @objc public var attributesToSnippet: [String]? {
         get { return Query.parseStringArray(get("attributesToSnippet")) }
-        set { set("attributesToSnippet", value: Query.buildJSONArray(newValue)) }
+        set { set("attributesToSnippet", value: Query.buildJSONArray(newValue as [AnyObject]?)) }
     }
     
     /// If set to true, the result hits will contain ranking information in `_rankingInfo` attribute.
@@ -652,7 +651,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     /// be approximate, the attribute `exhaustiveFacetsCount` in the response is true when the count is exact.
     @objc public var facets: [String]? {
         get { return Query.parseStringArray(get("facets")) }
-        set { set("facets", value: Query.buildJSONArray(newValue)) }
+        set { set("facets", value: Query.buildJSONArray(newValue as [AnyObject]?)) }
     }
     
     /// Filter the query by a list of facets.
@@ -705,7 +704,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
         get {
             if let fields = get("aroundLatLng")?.components(separatedBy: ",") {
                 if fields.count == 2 {
-                    if let lat = Double(fields[0]), lng = Double(fields[1]) {
+                    if let lat = Double(fields[0]), let lng = Double(fields[1]) {
                         return LatLng(lat: lat, lng: lng)
                     }
                 }
@@ -789,7 +788,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
                 if fields.count % 4 == 0 {
                     var result = [GeoRect]()
                     for i in 0..<(fields.count / 4) {
-                        if let lat1 = Double(fields[4 * i + 0]), lng1 = Double(fields[4 * i + 1]), lat2 = Double(fields[4 * i + 2]), lng2 = Double(fields[4 * i + 3]) {
+                        if let lat1 = Double(fields[4 * i + 0]), let lng1 = Double(fields[4 * i + 1]), let lat2 = Double(fields[4 * i + 2]), let lng2 = Double(fields[4 * i + 3]) {
                             result.append(GeoRect(p1: LatLng(lat: lat1, lng: lng1), p2: LatLng(lat: lat2, lng: lng2)))
                         }
                     }
@@ -823,7 +822,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
                 if fields.count % 2 == 0 && fields.count / 2 >= 3 {
                     var result = [LatLng]()
                     for i in 0..<(fields.count / 2) {
-                        if let lat = Double(fields[2 * i + 0]), lng = Double(fields[2 * i + 1]) {
+                        if let lat = Double(fields[2 * i + 0]), let lng = Double(fields[2 * i + 1]) {
                             result.append(LatLng(lat: lat, lng: lng))
                         }
                     }
@@ -879,7 +878,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     ///
     /// NOTE: Primarily intended for Objective-C use. Swift coders should use `Query.init(copy:)`.
     ///
-    @objc public func copy(with zone: NSZone?) -> AnyObject {
+    @objc public func copy(with zone: NSZone? = nil) -> Any {
         // NOTE: As per the docs, the zone argument is ignored.
         return Query(copy: self)
     }
@@ -937,7 +936,7 @@ public func ==(lhs: LatLng, rhs: LatLng) -> Bool {
     
     // MARK: Equatable
     
-    override public func isEqual(_ object: AnyObject?) -> Bool {
+    override public func isEqual(_ object: Any?) -> Bool {
         guard let rhs = object as? Query else {
             return false
         }

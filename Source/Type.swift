@@ -23,5 +23,5 @@
 
 import Foundation
 
-public typealias CompletionHandler = (content: [String: AnyObject]?, error: NSError?) -> Void
+public typealias CompletionHandler = (_ content: [String: AnyObject]?, _ error: NSError?) -> Void
 
