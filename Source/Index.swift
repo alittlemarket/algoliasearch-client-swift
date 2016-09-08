@@ -135,7 +135,7 @@ import Foundation
     /// - returns: A cancellable operation.
     ///
     @discardableResult
-    @objc public func getObject(_ objectID: String, completionHandler: CompletionHandler) -> Operation {
+    @objc public func getObject(_ objectID: String, completionHandler: @escaping CompletionHandler) -> Operation {
         let path = "1/indexes/\(urlEncodedIndexName)/\(objectID.urlEncode())"
         return client.performHTTPQuery(path, method: .GET, body: nil, hostnames: client.readHosts, completionHandler: completionHandler)
     }
@@ -148,7 +148,7 @@ import Foundation
     /// - returns: A cancellable operation.
     ///
     @discardableResult
-    @objc public func getObject(_ objectID: String, attributesToRetrieve attributes: [String], completionHandler: CompletionHandler) -> Operation {
+    @objc public func getObject(_ objectID: String, attributesToRetrieve attributes: [String], completionHandler: @escaping CompletionHandler) -> Operation {
         let query = Query()
         query.attributesToRetrieve = attributes
         let path = "1/indexes/\(urlEncodedIndexName)/\(objectID.urlEncode())?\(query.build())"
@@ -162,7 +162,7 @@ import Foundation
     /// - returns: A cancellable operation.
     ///
     @discardableResult
-    @objc public func getObjects(_ objectIDs: [String], completionHandler: CompletionHandler) -> Operation {
+    @objc public func getObjects(_ objectIDs: [String], completionHandler: @escaping CompletionHandler) -> Operation {
         let path = "1/indexes/*/objects"
         
         var requests = [AnyObject]()
@@ -256,7 +256,7 @@ import Foundation
     /// - returns: A cancellable operation.
     ///
     @discardableResult
-    @objc public func search(_ query: Query, completionHandler: CompletionHandler) -> Operation {
+    @objc public func search(_ query: Query, completionHandler: @escaping CompletionHandler) -> Operation {
         let path = "1/indexes/\(urlEncodedIndexName)/query"
         let request = ["params": query.build() as AnyObject]
         
@@ -292,7 +292,7 @@ import Foundation
     /// - returns: A cancellable operation.
     ///
     @discardableResult
-    @objc public func getSettings(_ completionHandler: CompletionHandler) -> Operation {
+    @objc public func getSettings(_ completionHandler: @escaping CompletionHandler) -> Operation {
         let path = "1/indexes/\(urlEncodedIndexName)/settings"
         return client.performHTTPQuery(path, method: .GET, body: nil, hostnames: client.readHosts, completionHandler: completionHandler)
     }
@@ -361,7 +361,7 @@ import Foundation
     /// - returns: A cancellable operation.
     ///
     @discardableResult
-    @objc public func browse(_ query: Query, completionHandler: CompletionHandler) -> Operation {
+    @objc public func browse(_ query: Query, completionHandler: @escaping CompletionHandler) -> Operation {
         let path = "1/indexes/\(urlEncodedIndexName)/browse"
         let body = [
             "params": query.build() as AnyObject
@@ -378,7 +378,7 @@ import Foundation
     /// - returns: A cancellable operation.
     ///
     @discardableResult
-    @objc public func browseFrom(_ cursor: String, completionHandler: CompletionHandler) -> Operation {
+    @objc public func browseFrom(_ cursor: String, completionHandler: @escaping CompletionHandler) -> Operation {
         let path = "1/indexes/\(urlEncodedIndexName)/browse?cursor=\(cursor.urlEncode())"
         return client.performHTTPQuery(path, method: .GET, body: nil, hostnames: client.readHosts, completionHandler: completionHandler)
     }
@@ -393,7 +393,7 @@ import Foundation
     /// - returns: A cancellable operation.
     ///
     @discardableResult
-    @objc public func waitTask(_ taskID: Int, completionHandler: CompletionHandler) -> Operation {
+    @objc public func waitTask(_ taskID: Int, completionHandler: @escaping CompletionHandler) -> Operation {
         let operation = WaitOperation(index: self, taskID: taskID, completionHandler: completionHandler)
         operation.start()
         return operation
@@ -410,7 +410,7 @@ import Foundation
         static let BASE_DELAY = 0.1     ///< Minimum wait delay.
         static let MAX_DELAY  = 5.0     ///< Maximum wait delay.
         
-        init(index: Index, taskID: Int, completionHandler: CompletionHandler) {
+        init(index: Index, taskID: Int, completionHandler: @escaping CompletionHandler) {
             self.index = index
             self.taskID = taskID
             self.completionHandler = completionHandler
@@ -564,7 +564,7 @@ import Foundation
     /// - returns: A cancellable operation.
     ///
     @discardableResult
-    @objc public func searchDisjunctiveFaceting(_ query: Query, disjunctiveFacets: [String], refinements: [String: [String]], completionHandler: CompletionHandler) -> Operation {
+    @objc public func searchDisjunctiveFaceting(_ query: Query, disjunctiveFacets: [String], refinements: [String: [String]], completionHandler: @escaping CompletionHandler) -> Operation {
         var requests = [IndexQuery]()
         
         // Build the first, global query.

@@ -158,7 +158,7 @@ import Foundation
     /// - returns: A cancellable operation.
     ///
     @discardableResult
-    @objc public func listIndexes(_ completionHandler: CompletionHandler) -> Operation {
+    @objc public func listIndexes(_ completionHandler: @escaping CompletionHandler) -> Operation {
         return performHTTPQuery("1/indexes", method: .GET, body: nil, hostnames: readHosts, completionHandler: completionHandler)
     }
 
